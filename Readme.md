@@ -16,3 +16,10 @@ filepath_code = './algorithm/shortestpath/program/dijkstra.cpp' #代码地址
 ```
 
 以上内容都可以在`run.py`中进行修改。
+
+
+<!-- zip -e 2022.zip ./data/problem.md ./images/dijkstra.png
+
+zip -e 2022.zip ./data/problem.pdf
+2022
+2022 -->
