@@ -3,7 +3,7 @@ from flask import Flask, escape, url_for, request, render_template, jsonify
 import sys
 import os
 
-from flask_sqlalchemy import SQLAlchemy  # 导入扩展类
+# from flask_sqlalchemy import SQLAlchemy  # 导入扩展类
 
 app = Flask(__name__)
 
