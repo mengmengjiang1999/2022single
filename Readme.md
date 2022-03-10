@@ -24,21 +24,28 @@ zip -e 2022.zip ./data/problem.pdf
 2022
 2022 -->
 
-<!-- ssh mengmengjiang@166.111.7.121 -->
+ssh mengmengjiang@166.111.7.121
 
 <!-- gunicorn -w 4 -b 166.111.7.121:5000 app:app -->
-<!-- http://166.111.7.121/download/fb7929605a5d613883397bd2cf9284d30694f3d5.pdf -->
+
+http://166.111.7.121/download/fb7929605a5d613883397bd2cf9284d30694f3d5.pdf
 
 <!-- sudo vim /etc/nginx/sites-available/default -->
 
- sudo vim /etc/nginx/sites-available/default
- sudo nginx -t
- gunicorn -w 4 -b 0.0.0.0:5000 app:app 
+
+sudo vim /etc/nginx/sites-available/default
+sudo nginx -t
+gunicorn -w 4 -b 127.0.0.1:5000 app:app 
 
 
-nohup gunicorn -w 2 -b 127.0.0.1:5000 app:app &
+nohup gunicorn -w 4 -b 127.0.0.1:5000 app:app &
 
 ps -e | grep gunicorn
 
-
+部署参考资料：
+（最好用的）
 https://blog.csdn.net/william_munch/article/details/103368580
+（second）
+https://www.jianshu.com/p/d607ca5718a5
+（third）
+https://dormousehole.readthedocs.io/en/latest/deploying/wsgi-standalone.html

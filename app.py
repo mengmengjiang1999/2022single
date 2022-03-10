@@ -41,7 +41,16 @@ app = Flask(__name__)
 
 @app.route("/download/<filepath>", methods=['GET'])
 def download_file(filepath):
-    return app.send_static_file(filepath)  
+
+    file_codelist = open('list.txt','r')
+    codes = file_codelist.readlines()
+
+    for i in range(len(codes)):
+        filepath_problem_this = codes[i].strip()+'.pdf'
+        if filepath_problem_this == filepath:
+            return app.send_static_file(filepath)  
+    
+    return "Wrong Path"
 
 @app.route("/")
 def hello():
