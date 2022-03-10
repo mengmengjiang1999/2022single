@@ -43,6 +43,10 @@ app = Flask(__name__)
 def download_file(filepath):
     return app.send_static_file(filepath)  
 
+@app.route("/")
+def hello():
+    return "Hello"
+
 
 def genenrate_files():
 # 进行预编译

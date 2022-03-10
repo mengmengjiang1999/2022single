@@ -23,3 +23,8 @@ filepath_code = './algorithm/shortestpath/program/dijkstra.cpp' #代码地址
 zip -e 2022.zip ./data/problem.pdf
 2022
 2022 -->
+
+<!-- ssh mengmengjiang@166.111.7.121 -->
+
+<!-- gunicorn -w 4 -b 166.111.7.121:5000 app:app -->
+<!-- http://166.111.7.121/download/fb7929605a5d613883397bd2cf9284d30694f3d5.pdf -->
