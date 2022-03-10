@@ -34,3 +34,11 @@ zip -e 2022.zip ./data/problem.pdf
  sudo vim /etc/nginx/sites-available/default
  sudo nginx -t
  gunicorn -w 4 -b 0.0.0.0:5000 app:app 
+
+
+nohup gunicorn -w 2 -b 127.0.0.1:5000 app:app &
+
+ps -e | grep gunicorn
+
+
+https://blog.csdn.net/william_munch/article/details/103368580
