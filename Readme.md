@@ -28,3 +28,9 @@ zip -e 2022.zip ./data/problem.pdf
 
 <!-- gunicorn -w 4 -b 166.111.7.121:5000 app:app -->
 <!-- http://166.111.7.121/download/fb7929605a5d613883397bd2cf9284d30694f3d5.pdf -->
+
+<!-- sudo vim /etc/nginx/sites-available/default -->
+
+ sudo vim /etc/nginx/sites-available/default
+ sudo nginx -t
+ gunicorn -w 4 -b 0.0.0.0:5000 app:app 
