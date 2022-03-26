@@ -44,6 +44,13 @@ def download_file(filepath):
     return app.send_static_file(filepath)  
 
 
+@app.route("/problemlist", methods = ['GET'])
+def problemlist():
+    problems = {
+        'dijkstra': '/algorithm/dijkstra'
+    }
+    return jsonify(problems)
+
 def genenrate_files():
 # 进行预编译
     from run import pre_compile
