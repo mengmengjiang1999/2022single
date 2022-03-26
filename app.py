@@ -56,10 +56,6 @@ def download_file(filepath):
 def index():
     return "Hello World!"
 
-@app.route("/api/timenow", methods=['GET'])
-def timenow():
-    return "111"
-
 @app.route("/api", methods=['GET'])
 def timenow():
     return "111"
