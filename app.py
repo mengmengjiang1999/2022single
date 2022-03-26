@@ -3,7 +3,7 @@ from flask import Flask, escape, url_for, request, render_template, jsonify
 import sys
 import os
 
-from flask_sqlalchemy import SQLAlchemy  # 导入扩展类
+# from flask_sqlalchemy import SQLAlchemy  # 导入扩展类
 
 app = Flask(__name__)
 
@@ -41,7 +41,24 @@ app = Flask(__name__)
 
 @app.route("/download/<filepath>", methods=['GET'])
 def download_file(filepath):
-    return app.send_static_file(filepath)  
+
+    file_codelist = open('list.txt','r')
+    codes = file_codelist.readlines()
+
+    for i in range(len(codes)):
+        filepath_problem_this = codes[i].strip()+'.pdf'
+        if filepath_problem_this == filepath:
+            return app.send_static_file(filepath)  
+    
+    return "Wrong Path"
+
+@app.route("/")
+def index():
+    return "Hello World!"
+
+@app.route("/api", methods=['GET'])
+def timenow():
+    return "111"
 
 
 @app.route("/problemlist", methods = ['GET'])
