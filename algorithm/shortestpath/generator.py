@@ -70,6 +70,6 @@ def gen_problem(S,T):
 
 答案为一个正整数，如果从起点到终点不存在一条路径，请提交2147483647。
 
-![dijkstra.png](/Users/chenzm/Projects/2022/2022single/images/dijkstra.png)
+<!-- ![dijkstra.png](/Users/chenzm/Projects/2022/2022single/images/dijkstra.png)  -->
     '''
     return problem

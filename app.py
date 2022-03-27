@@ -15,7 +15,7 @@ def base64ToString(b):
 
 app = Flask(__name__)
 
-@app.route('/algorithm/dijkstra', methods = ['GET'])
+@app.route('/algorithm/dijkstra', methods = ['GET', 'POST'])
 def dijkstra():
     if request.method == 'GET':
         # N = request.form['N']
@@ -27,9 +27,9 @@ def dijkstra():
 
         filepath_in, filepath_ans, filepath_problem, filepath_image = run()
 
-        file_in = open(filepath_in,"r")
-        data_in = file_in.read()
-        file_in.close()
+        # file_in = open(filepath_in,"r")
+        # data_in = file_in.read()
+        # file_in.close()
 
         file_ans = open(filepath_ans,"r")
         data_ans = file_ans.read()
@@ -59,7 +59,18 @@ def dijkstra():
         }
         return jsonify(data)
     elif request.method == 'POST':
-        return 'haha'
+        filepath_ans = './data/data.ans' #答案地址
+        file_ans = open(filepath_ans,"r")
+        data_ans = file_ans.read()
+        file_ans.close()
+
+        data_input = request.get_json()
+        print(request.get_json())
+        data = {
+            'answer': data_ans==data_input['answer'],
+            'right_answer': data_ans,
+        }
+        return jsonify(data)
 
 @app.route('/images/<filepath>', methods = ['GET'])
 def download_imagess(filepath):
