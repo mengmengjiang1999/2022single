@@ -31,9 +31,15 @@ def dijkstra():
         # data_in = file_in.read()
         # file_in.close()
 
-        file_ans = open(filepath_ans,"r")
-        data_ans = file_ans.read()
-        file_ans.close()
+        problem_id = random.randint(0,100)
+
+        # 保存答案
+        os.system('cp ' + filepath_ans + ' ./data/answer/' + str(problem_id) + '.ans')
+        os.system('cp ' + filepath_image + ' ./data/image/' + str(problem_id) + '.png')
+
+        # file_ans = open(filepath_ans,"r")
+        # data_ans = file_ans.read()
+        # file_ans.close()
 
         file_problem = open(filepath_problem,"r")
         data_problem = file_problem.read()
@@ -45,27 +51,25 @@ def dijkstra():
         print(data_image)
         file_image.close()
 
-        # 保存题目编号和答案
-        os.system('cp ' + filepath_image + ' ./static/'+ '000.png')
-        print('cp ' + filepath_image + ' ./static/'+ '000.png')
-
         # 返回题目
         data = {
             'N': N,
-            # 'data_in': data_in,
-            # 'data_ans': data_ans,
+            'problem_id' : problem_id,
             'data_problem': data_problem,
-            'data_image': data_image.decode()
+            'data_image': data_image.decode(),
         }
         return jsonify(data)
     elif request.method == 'POST':
-        filepath_ans = './data/data.ans' #答案地址
+        data_input = request.get_json()
+        print(request.get_json())
+
+        filepath_ans = './data/answer/' + data_input['problem_id'] + '.ans' #答案地址
+
         file_ans = open(filepath_ans,"r")
         data_ans = file_ans.read()
         file_ans.close()
 
-        data_input = request.get_json()
-        print(request.get_json())
+
         data = {
             'answer': data_ans==data_input['answer'],
             'right_answer': data_ans,
