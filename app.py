@@ -4,6 +4,13 @@ import sys
 import os
 import random
 
+import base64
+def stringToBase64(s):
+    return base64.b64encode(s.encode('utf-8'))
+
+def base64ToString(b):
+    return base64.b64decode(b).decode('utf-8')
+
 # from flask_sqlalchemy import SQLAlchemy  # 导入扩展类
 
 app = Flask(__name__)
@@ -32,19 +39,15 @@ def dijkstra():
         data_problem = file_problem.read()
         file_problem.close()
 
+        file_image = open(filepath_image, "rb")
+        data_image = file_image.read()
+        data_image = base64.b64encode(data_image)
+        print(data_image)
+        file_image.close()
+
         # 保存题目编号和答案
-
         os.system('cp ' + filepath_image + ' ./static/'+ '000.png')
-
         print('cp ' + filepath_image + ' ./static/'+ '000.png')
-        
-        # filename =  'dijkstra.json' + '.json'
-        # directory = "/data/test/"  #json文件所在的目录路径
-        # try:
-        #     with open(directory + '/' + filename) as f:
-        #         jsonStr = json.load(f)
-        # except Exception as e:
-        #         return jsonify({"code": "异常", "message": "{}".format(e)})
 
         # 返回题目
         data = {
@@ -52,7 +55,7 @@ def dijkstra():
             # 'data_in': data_in,
             # 'data_ans': data_ans,
             'data_problem': data_problem,
-            'image_path': '/images/000.png'
+            'data_image': data_image.decode()
         }
         return jsonify(data)
     elif request.method == 'POST':
@@ -139,4 +142,6 @@ if __name__ == '__main__':
     from werkzeug.middleware.proxy_fix import ProxyFix
     app.wsgi_app = ProxyFix(app.wsgi_app)
 
-    app.run()
+    app.run(debug=True)
+
+    # app.run()
