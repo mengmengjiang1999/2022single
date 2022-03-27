@@ -1,43 +1,67 @@
-from flask import Flask, escape, url_for, request, render_template, jsonify
+from flask import Flask, escape, url_for, request, render_template, jsonify, json
 
 import sys
 import os
+import random
 
 # from flask_sqlalchemy import SQLAlchemy  # 导入扩展类
 
 app = Flask(__name__)
 
-# @app.route('/algorithm/dijkstra')
-# def dijkstra():
-#     if request.method == 'GET':
-#         N = request.form['N']
+@app.route('/algorithm/dijkstra', methods = ['GET'])
+def dijkstra():
+    if request.method == 'GET':
+        # N = request.form['N']
 
-#         from run import run
+        # 生成题目和答案
+        N = random.randint(5,8)
 
-#         filepath_in, filepath_ans, filepath_problem = run()
+        from run import run
 
-#         file_in = open(filepath_in,"r")
-#         data_in = file_in.read()
-#         file_in.close()
+        filepath_in, filepath_ans, filepath_problem, filepath_image = run()
 
-#         file_ans = open(filepath_ans,"r")
-#         data_ans = file_ans.read()
-#         file_ans.close()
+        file_in = open(filepath_in,"r")
+        data_in = file_in.read()
+        file_in.close()
 
-#         file_problem = open(filepath_problem,"r")
-#         data_problem = file_problem.read()
-#         file_problem.close()
+        file_ans = open(filepath_ans,"r")
+        data_ans = file_ans.read()
+        file_ans.close()
 
-#         data = {
-#             'N': N,
-#             'data_in': data_in,
-#             'data_ans': data_ans,
-#             'data_problem': data_problem,
-#         }
-#         return jsonify(data)
-#     elif request.method == 'POST':
-#         return 'haha'
+        file_problem = open(filepath_problem,"r")
+        data_problem = file_problem.read()
+        file_problem.close()
 
+        # 保存题目编号和答案
+
+        os.system('cp ' + filepath_image + ' ./static/'+ '000.png')
+
+        print('cp ' + filepath_image + ' ./static/'+ '000.png')
+        
+        # filename =  'dijkstra.json' + '.json'
+        # directory = "/data/test/"  #json文件所在的目录路径
+        # try:
+        #     with open(directory + '/' + filename) as f:
+        #         jsonStr = json.load(f)
+        # except Exception as e:
+        #         return jsonify({"code": "异常", "message": "{}".format(e)})
+
+        # 返回题目
+        data = {
+            'N': N,
+            # 'data_in': data_in,
+            # 'data_ans': data_ans,
+            'data_problem': data_problem,
+            'image_path': '/images/000.png'
+        }
+        return jsonify(data)
+    elif request.method == 'POST':
+        return 'haha'
+
+@app.route('/images/<filepath>', methods = ['GET'])
+def download_imagess(filepath):
+    return app.send_static_file(filepath)  
+    return "Wrong Path"
 
 @app.route("/download/<filepath>", methods=['GET'])
 def download_file(filepath):
@@ -60,11 +84,20 @@ def index():
 def timenow():
     return "111"
 
-
 @app.route("/problemlist", methods = ['GET'])
 def problemlist():
     problems = {
-        'dijkstra': '/algorithm/dijkstra'
+        # '最短路径': '/algorithm/dijkstra'
+        'algorithms':[
+            {
+                'problem': 'shortest path',
+                'algorithm': 'dijkstra',
+            },
+            {
+                'problem': 'TSP',
+                'algorithm': 'fzdjf',
+            },
+        ]
     }
     return jsonify(problems)
 

@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "element-plus": "^2.1.5",
     "lodash.uniqueid": "^4.0.1"
   }
 }

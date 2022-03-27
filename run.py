@@ -4,6 +4,7 @@ import os
 filepath_in = './data/data.in' #输入数据地址
 filepath_ans = './data/data.ans' #答案地址
 filepath_problem = './data/problem.md' #题面地址
+filepath_problem_html = './data/problem.html' #题面地址
 filepath_image = './images/dijkstra.png' #图片地址
 
 filepath_exe = './algorithm/shortestpath/program/main' #可执行文件地址
@@ -43,7 +44,10 @@ def run():
     with open(filepath_problem, "w") as file_problem:
         file_problem.write(problem)
 
-    return filepath_in, filepath_ans, filepath_problem
+    # 转换成html
+    os.system('pandoc --standalone --template  ./data/template.html '+ filepath_problem + ' -o ' + filepath_problem_html)
+
+    return filepath_in, filepath_ans, filepath_problem_html, filepath_image
 
 if __name__ == '__main__':
     pre_compile()
