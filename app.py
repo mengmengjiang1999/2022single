@@ -100,6 +100,12 @@ def dijkstra():
         data_ans = file_ans.read()
         file_ans.close()
 
+        last_answer = data_input['answer']
+
+        filepath_last_ans = './data/record/' + data_input['problem_id'] + '.ans' #上次提交的答案
+        file_last = open(filepath_last_ans,"w")
+        file_last.write(str(last_answer))
+        file_last.close()
 
         data = {
             'answer': data_ans==data_input['answer'],
