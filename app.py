@@ -6,6 +6,9 @@ import sys
 import os
 import random
 
+from datetime import datetime
+import hashlib
+
 import base64
 def stringToBase64(s):
     return base64.b64encode(s.encode('utf-8'))
@@ -54,7 +57,12 @@ def dijkstra():
         # data_in = file_in.read()
         # file_in.close()
 
-        problem_id = random.randint(0,100)
+        time = datetime.timestamp(datetime.now())
+        # print(time)
+        data_sha = hashlib.sha256(str(time).encode('utf-8')).hexdigest()  
+        print(data_sha) 
+        
+        problem_id = data_sha
 
         # 保存答案
         os.system('cp ' + filepath_ans + ' ./data/answer/' + str(problem_id) + '.ans')
@@ -71,7 +79,7 @@ def dijkstra():
         file_image = open(filepath_image, "rb")
         data_image = file_image.read()
         data_image = base64.b64encode(data_image)
-        print(data_image)
+        # print(data_image)
         file_image.close()
 
         # 返回题目
