@@ -49,3 +49,19 @@ https://blog.csdn.net/william_munch/article/details/103368580
 https://www.jianshu.com/p/d607ca5718a5
 （third）
 https://dormousehole.readthedocs.io/en/latest/deploying/wsgi-standalone.html
+
+关于数据库的使用方法
+https://www.geeksforgeeks.org/connect-flask-to-a-database-with-flask-sqlalchemy/
+
+```
+python3
+>>> from app import db
+>>> db.create_all()
+>>> exit()
+
+pip3 install Flask-Migrate
+
+flask db init
+flask db migrate -m "Initial migration"
+flask db upgrade
+```

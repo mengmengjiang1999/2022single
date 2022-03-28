@@ -1,5 +1,7 @@
 from flask import Flask, escape, url_for, request, render_template, jsonify, json
 
+from flask_sqlalchemy import SQLAlchemy
+
 import sys
 import os
 import random
@@ -14,6 +16,27 @@ def base64ToString(b):
 # from flask_sqlalchemy import SQLAlchemy  # 导入扩展类
 
 app = Flask(__name__)
+
+# adding configuration for using a sqlite database
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
+ 
+# Creating an SQLAlchemy instance
+db = SQLAlchemy(app)
+
+# Import for Migrations
+from flask_migrate import Migrate, migrate
+ 
+# Settings for migrations
+migrate = Migrate(app, db)
+
+# class Profile(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     first_name = db.Column(db.String(20), unique=False, nullable=False)
+#     last_name = db.Column(db.String(20), unique=False, nullable=False)
+#     age = db.Column(db.Integer, nullable=False)
+ 
+#     def __repr__(self):
+#         return f"Name : {self.first_name}, Age: {self.age}"
 
 @app.route('/algorithm/dijkstra', methods = ['GET', 'POST'])
 def dijkstra():
