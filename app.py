@@ -1,3 +1,4 @@
+from enum import unique
 from flask import Flask, escape, url_for, request, render_template, jsonify, json
 
 from flask_sqlalchemy import SQLAlchemy
@@ -32,14 +33,14 @@ from flask_migrate import Migrate, migrate
 # Settings for migrations
 migrate = Migrate(app, db)
 
-# class Profile(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     first_name = db.Column(db.String(20), unique=False, nullable=False)
-#     last_name = db.Column(db.String(20), unique=False, nullable=False)
-#     age = db.Column(db.Integer, nullable=False)
+class Profile(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    problem_id = db.Column(db.String(50), unique=True, nullable=False)
+    status = db.Column(db.Integer, unique=False, nullable=False)
+    # status: 0:还未做，1:做了答案正确，2：做了，答案错误
  
-#     def __repr__(self):
-#         return f"Name : {self.first_name}, Age: {self.age}"
+    def __repr__(self):
+        return f"id : {self.id}, problem_id: {self.problem_id}, status: {self.status}"
 
 @app.route('/algorithm/dijkstra', methods = ['GET', 'POST'])
 def dijkstra():
