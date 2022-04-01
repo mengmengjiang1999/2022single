@@ -53,6 +53,9 @@ https://dormousehole.readthedocs.io/en/latest/deploying/wsgi-standalone.html
 关于数据库的使用方法
 https://www.geeksforgeeks.org/connect-flask-to-a-database-with-flask-sqlalchemy/
 
+关于OJ的数学公式怎么敲
+https://www.bbsmax.com/A/rV57pNadPD/
+
 ```
 python3
 >>> from app import db
