@@ -1,5 +1,7 @@
 # Readmd
 
+
+
 运行方式：
 
 ```shell
@@ -50,13 +52,14 @@ https://www.jianshu.com/p/d607ca5718a5
 （third）
 https://dormousehole.readthedocs.io/en/latest/deploying/wsgi-standalone.html
 
-关于数据库的使用方法
+关于flask数据库的使用方法
 https://www.geeksforgeeks.org/connect-flask-to-a-database-with-flask-sqlalchemy/
+
 
 关于OJ的数学公式怎么敲
 https://www.bbsmax.com/A/rV57pNadPD/
 
-```
+<!-- ```
 python3
 >>> from app import db
 >>> db.create_all()
@@ -68,3 +71,19 @@ flask db init
 flask db migrate -m "Initial migration"
 flask db upgrade
 ```
+ -->
+
+```
+运行前可以选择是否要删库重建
+正式发布后不得使用此命令
+flask initdb
+```
+
+
+<!-- 关于登录注册 -->
+
+https://www.cnblogs.com/hhh5460/p/9745812.html
+
+http://www.ityouknow.com/python/2019/11/13/python-web-flask-login-057.html
+
+pip3 install flask-login
