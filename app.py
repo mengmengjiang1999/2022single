@@ -88,9 +88,10 @@ def initdb(drop):
     db.create_all()
     click.echo('Initialized database.')  # 输出提示信息
 
-class Profile(db.Model):
+class Problem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     problem_id = db.Column(db.String(50), unique=True, nullable=False)
+    problem_type = db.Column(db.Integer, unique=True, nullable=False)
     status = db.Column(db.Integer, unique=False, nullable=False)
     # status: 0:还未做，1:做了答案正确，2：做了，答案错误
  
@@ -335,6 +336,10 @@ def download_file(filepath):
 @app.route("/")
 def index():
     return "Hello World!"
+
+# @app.route("/login")
+# def index():
+#     return "Hello World!"
 
 # # 1.主页
 # @app.route('/')
