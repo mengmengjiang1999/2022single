@@ -169,17 +169,23 @@ def login():
             curr_user.id = user_id
 
             # 通过Flask-Login的login_user方法登录用户
-            login_user(curr_user)
+            
 
             # return redirect(url_for('index'))
             # return jsonify(data)
             data['error']= "Wrong username or password!"
+        else:
+            login_user(curr_user)
 
         # flash('Wrong username or password!')
     # GET 请求
     # return render_template('login.html')
     return jsonify(data)
 
+@app.route('/test', methods=['GET','POST'])
+def test():
+    print(request.form)
+    return "haha"
 # @app.route('/login', methods=['GET', 'POST'])
 # def login():
 #     data = {

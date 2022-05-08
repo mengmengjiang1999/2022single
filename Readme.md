@@ -4,6 +4,13 @@
 
 运行方式：
 
+本单机版app已经升级为功能齐全的后端
+```shell
+python3 app.py
+```
+
+
+下面的已作废
 ```shell
 python3 run.py
 ```
