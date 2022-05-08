@@ -3,22 +3,13 @@ from flask import Flask, escape, url_for, request, render_template, jsonify, jso
 
 from functools import wraps
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import and_, or_
+from sqlalchemy import and_, false, or_, true
 
 from flask_login import LoginManager
-from flask_login import UserMixin, login_user, logout_user
+from flask_login import UserMixin, login_user, logout_user, login_required
 
-class User_Login(UserMixin):
+class User(UserMixin):
     pass
-
-users = [
-
-]
-
-def query_user(user_id):
-    for user in users:
-        if user_id == user['id']:
-            return user
 
 import sys
 import os
@@ -66,11 +57,12 @@ login_manager.login_message = 'Access denied.'
 login_manager.init_app(app)
 
 
+
 @login_manager.user_loader
-def load_user(user_id):
-    if query_user(user_id) is not None:
-        curr_user = User_Login()
-        curr_user.id = user_id
+def load_user(username):
+    if query_user(username) is not None:
+        curr_user = User()
+        curr_user.id = username
 
         return curr_user
 
@@ -98,7 +90,7 @@ class Problem(db.Model):
     def __repr__(self):
         return "id : {self.id}, problem_id: {self.problem_id}, status: {self.status}"
 
-class User(db.Model):
+class Userinfo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True)
     password = db.Column(db.String(256), unique=False)
@@ -107,8 +99,15 @@ class User(db.Model):
     def __repr__(self):
         return '<User %r>' % self.username
 
+def query_user(username):
+    user = Userinfo.query.filter(Userinfo.username == username).first()
+    if user is None:
+        return False
+    else:
+        return True
+
 def valid_login(username, password):
-    user = User.query.filter(and_(User.username == username, User.password == password)).first()
+    user = Userinfo.query.filter(and_(Userinfo.username == username, Userinfo.password == password)).first()
     if user:
         return True
     else:
@@ -116,76 +115,77 @@ def valid_login(username, password):
 
 # 注册检验（用户名、邮箱验证）
 def valid_regist(username, email):
-    user = User.query.filter(or_(User.username == username, User.email == email)).first()
+    user = Userinfo.query.filter(or_(Userinfo.username == username, Userinfo.email == email)).first()
     if user:
         return False
     else:
         return True
 
-# 登录
-def login_required(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        if session.get('username'):
-            return func(*args, **kwargs)
-        else:
-            # return redirect(url_for('login', next=request.url)) # 
-            return {'error': "error"}
-    return wrapper
+# # 登录
+# def login_required(func):
+#     @wraps(func)
+#     def wrapper(*args, **kwargs):
+#         if session.get('username'):
+#             return func(*args, **kwargs)
+#         else:
+#             # return redirect(url_for('login', next=request.url)) # 
+#             return {'error': "error"}
+#     return wrapper
 
 # 4.注册
 @app.route('/regist', methods=['GET','POST'])
 def regist():
     error = None
     data = {
+        'status': False,
         'error': None,
     }
     if request.method == 'POST':
         data_input = request.get_json()
+        print("==============================")
+        print(data_input)
         if data_input['password1'] != data_input['password2']:
             error = '两次密码不相同！'
         elif valid_regist(data_input['username'], data_input['email']):
-            user = User(username=data_input['username'], password=data_input['password1'], email=data_input['email'])
+            print("==============================")
+            print(data_input)
+            user = Userinfo(username=data_input['username'], password=data_input['password1'], email=data_input['email'])
             db.session.add(user)
             db.session.commit()
+            data['status']=True
         else:
             error = '该用户名或邮箱已被注册！'
             data['error']=error
-    
-    # return render_template('regist.html', error=error)
     return jsonify(data)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     data = {
+        'status': False,
         'error': None
     }
     if request.method == 'POST':
-        user_id = request.form.get('userid')
-        user = query_user(user_id)
-        if user is not None and request.form['password'] == user['password']:
+        data_input = request.get_json()
+        username = data_input['username']
+        password = data_input['password']
 
+        if valid_login(username,password):
             curr_user = User()
-            curr_user.id = user_id
+            curr_user.id = username
 
-            # 通过Flask-Login的login_user方法登录用户
-            
-
-            # return redirect(url_for('index'))
-            # return jsonify(data)
-            data['error']= "Wrong username or password!"
-        else:
             login_user(curr_user)
+            data['status']=True,
+        else:
+            data['error']= "Wrong username or password!"
 
-        # flash('Wrong username or password!')
-    # GET 请求
-    # return render_template('login.html')
     return jsonify(data)
 
 @app.route('/test', methods=['GET','POST'])
 def test():
     print(request.form)
     return "haha"
+
+'''
 # @app.route('/login', methods=['GET', 'POST'])
 # def login():
 #     data = {
@@ -198,7 +198,7 @@ def test():
 #         if valid_login(data_input['username'], data_input['password']):
 #             # flash("成功登录！")
 #             username = data_input['username']
-#             # session['{0}'.format(username)] = username
+#             # session['\{\0}'.format(username)] = username
 #             session['username']=username
 #             print("session")
 #             print(session)
@@ -225,12 +225,13 @@ def test():
 #         print(session)
 #         # return redirect(url_for('home'))
 #     return jsonify(data)
+'''
 
 @app.route('/logout', methods=['GET', 'POST'])
 @login_required
 def logout():
     logout_user()
-    return 'Logged out successfully!'
+    return jsonify({'data':'Logged out successfully!'})
 
 @app.route('/clear_session', methods=['GET', 'POST'])
 def clean_session():
@@ -342,15 +343,6 @@ def download_file(filepath):
 @app.route("/")
 def index():
     return "Hello World!"
-
-# @app.route("/login")
-# def index():
-#     return "Hello World!"
-
-# # 1.主页
-# @app.route('/')
-# def home():
-#     return render_template('home.html', username=session.get('username'))
 
 @app.route("/api", methods=['GET'])
 def timenow():
