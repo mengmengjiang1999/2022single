@@ -1,3 +1,4 @@
+from crypt import methods
 from enum import unique
 from flask import Flask, escape, url_for, request, render_template, jsonify, json, redirect, session,flash
 
@@ -6,7 +7,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import and_, false, or_, true
 
 from flask_login import LoginManager
-from flask_login import UserMixin, login_user, logout_user, login_required
+from flask_login import UserMixin, login_user, logout_user, login_required, current_user
 
 class User(UserMixin):
     pass
@@ -178,6 +179,17 @@ def login():
         else:
             data['error']= "Wrong username or password!"
 
+    return jsonify(data)
+
+@app.route('/login_status', methods=['GET'])
+def login_status():
+    data = {
+        'status': False,
+    }
+    print(current_user)
+    if current_user.is_authenticated:
+        data['status']=True
+        data['username']=current_user.id
     return jsonify(data)
 
 @app.route('/test', methods=['GET','POST'])
