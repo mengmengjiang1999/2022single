@@ -84,9 +84,9 @@ def initdb(drop):
 class Problem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     # username = db.Column()
-    username = db.Column(db.String(80), unique=True)
+    username = db.Column(db.String(80), unique=False)
     problem_id = db.Column(db.String(50), unique=True, nullable=False)
-    problem_type = db.Column(db.Integer, unique=True, nullable=False)
+    problem_type = db.Column(db.Integer, unique=False, nullable=False)
     status = db.Column(db.Integer, unique=False, nullable=False)
     # status: 0:还未做，1:做了答案正确，2：做了，答案错误
  
@@ -110,7 +110,7 @@ def query_user(username):
         return True
 
 def query_problems(username):
-    prblm = Problem.query.filter(Problem.username == username)
+    prblm = Problem.query.filter(Problem.username == username).all()
     return prblm
     # plm = Problem.query.filter(Problem.)
 
@@ -395,12 +395,24 @@ def records():
     username = current_user.id
     print("username",username)
     prblm = query_problems(username)
-    prblm("做题记录")
+    print("做题记录")
     print(prblm)
-    data = {
-
-    }
-    return jsonify(data)
+    print(prblm[0])
+    data = []
+    for i in range(len(prblm)):
+        item = prblm[i]
+        data2 ={
+            'problem_id': item.problem_id,
+            'username': item.username,
+            'problem_type': item.problem_type,
+            'status': item.status,
+        }
+        print(item.id)
+        print(item.username)
+        print(item.problem_type)
+        print(item.status)
+        data.append(data2)
+    return jsonify({'data':data})
 
 def genenrate_files():
 # 进行预编译
