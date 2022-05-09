@@ -83,6 +83,8 @@ def initdb(drop):
 
 class Problem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    # username = db.Column()
+    username = db.Column(db.String(80), unique=True)
     problem_id = db.Column(db.String(50), unique=True, nullable=False)
     problem_type = db.Column(db.Integer, unique=True, nullable=False)
     status = db.Column(db.Integer, unique=False, nullable=False)
@@ -106,6 +108,11 @@ def query_user(username):
         return False
     else:
         return True
+
+def query_problems(username):
+    prblm = Problem.query.filter(Problem.username == username)
+    return prblm
+    # plm = Problem.query.filter(Problem.)
 
 def valid_login(username, password):
     user = Userinfo.query.filter(and_(Userinfo.username == username, Userinfo.password == password)).first()
@@ -283,11 +290,16 @@ def dijkstra():
         data_sha = hashlib.sha256(str(time).encode('utf-8')).hexdigest()  
         print(data_sha) 
         
-        problem_id = data_sha
+        # problem_id = data_sha
+
+        # 对数据库的修改
+        prblm = Problem(username=current_user.id, problem_id=data_sha, problem_type=0, status = 0)
+        db.session.add(prblm)
+        db.session.commit()
 
         # 保存答案
-        os.system('cp ' + filepath_ans + ' ./data/answer/' + str(problem_id) + '.ans')
-        os.system('cp ' + filepath_image + ' ./data/image/' + str(problem_id) + '.png')
+        os.system('cp ' + filepath_ans + ' ./data/answer/' + str(data_sha) + '.ans')
+        os.system('cp ' + filepath_image + ' ./data/image/' + str(data_sha) + '.png')
 
         # file_ans = open(filepath_ans,"r")
         # data_ans = file_ans.read()
@@ -306,7 +318,7 @@ def dijkstra():
         # 返回题目
         data = {
             'N': N,
-            'problem_id' : problem_id,
+            'problem_id' : data_sha,
             'data_problem': data_problem,
             'data_image': data_image.decode(),
         }
@@ -376,6 +388,19 @@ def problemlist():
         ]
     }
     return jsonify(problems)
+
+@app.route("/records", methods = ['GET'])
+@login_required
+def records():
+    username = current_user.id
+    print("username",username)
+    prblm = query_problems(username)
+    prblm("做题记录")
+    print(prblm)
+    data = {
+
+    }
+    return jsonify(data)
 
 def genenrate_files():
 # 进行预编译
