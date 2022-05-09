@@ -1,5 +1,6 @@
 from crypt import methods
 from enum import unique
+from cv2 import Algorithm
 from flask import Flask, escape, url_for, request, render_template, jsonify, json, redirect, session,flash
 
 from functools import wraps
@@ -298,6 +299,7 @@ def dijkstra():
         db.session.commit()
 
         # 保存答案
+        os.system('cp ' + filepath_problem + ' ./data/problem/' + str(data_sha) + '.problem')
         os.system('cp ' + filepath_ans + ' ./data/answer/' + str(data_sha) + '.ans')
         os.system('cp ' + filepath_image + ' ./data/image/' + str(data_sha) + '.png')
 
@@ -389,6 +391,8 @@ def problemlist():
     }
     return jsonify(problems)
 
+Algorithm_Type = ['shortest path','TSP']
+
 @app.route("/records", methods = ['GET'])
 @login_required
 def records():
@@ -404,7 +408,7 @@ def records():
         data2 ={
             'problem_id': item.problem_id,
             'username': item.username,
-            'problem_type': item.problem_type,
+            'problem_type': Algorithm_Type[item.problem_type],
             'status': item.status,
         }
         print(item.id)
@@ -413,6 +417,34 @@ def records():
         print(item.status)
         data.append(data2)
     return jsonify({'data':data})
+
+@app.route("/record", methods = ['GET'])
+@login_required
+def get_cirten_record():
+    username = current_user.id
+    my_problem_id = request.args.get('problem_id')
+
+    filepath_problem = ' ./data/problem/' + str(my_problem_id) + '.problem'
+    # filepath_ans = './data/answer/' + str(my_problem_id) + '.ans'
+    filepath_image = './data/image/' + str(my_problem_id) + '.ans'
+
+    file_problem = open(filepath_problem,"r")
+    data_problem = file_problem.read()
+    file_problem.close()
+
+    file_image = open(filepath_image, "rb")
+    data_image = file_image.read()
+    data_image = base64.b64encode(data_image)
+    # print(data_image)
+    file_image.close()
+
+    # 返回题目
+    data = {
+        'problem_id' : my_problem_id,
+        'data_problem': data_problem,
+        'data_image': data_image.decode(),
+    }
+    return jsonify(data)
 
 def genenrate_files():
 # 进行预编译
