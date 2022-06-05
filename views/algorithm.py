@@ -5,7 +5,7 @@ bluealgorithm=Blueprint('algorithm',__name__)   #蓝图的对象的名称=Bluepr
 
 from flask import request, jsonify
 
-from flask_login import current_user
+from flask_login import current_user, login_required
 from sqlalchemy import and_, false, null, or_, true
 
 from app import db
@@ -76,6 +76,7 @@ def run_algorithm_post(data_input:str):
     return data
 
 @bluealgorithm.route('/algorithm', methods = ['GET', 'POST'])
+@login_required
 def algorithm():
     if request.method == 'GET':
         data_input = request.args
@@ -89,7 +90,6 @@ def algorithm():
         print(problem_id)
 
         if not problem_id:
-
             curr_problem_type = 0
 
             if data_input.get('problem_type') == 'shortestpath':
@@ -134,24 +134,10 @@ def algorithm():
         data = run_algorithm_post(data_input)
         curr_problem_id = data_input['problem_id']
 
-        curr_problem_type=0
-        if data_input['problem_type'] == 'shortestpath':
-            curr_problem_type = 0
-        elif data_input['problem_type'] == 'tsp':
-            curr_problem_type = 1
-        elif data_input['problem_type'] == 'spancount':
-            curr_problem_type = 2
-        elif data_input['problem_type'] == 'rootcount':
-            curr_problem_type = 3
-        else:
-            return jsonify({
-            'status' : "FAIL" 
-        })
         print("curr_problem_id",curr_problem_id)
 
-        prblm = Problem.query.filter(and_(
-            Problem.problem_id==curr_problem_id,
-            Problem.problem_type==curr_problem_type)).first()
+        prblm = Problem.query.filter(
+            Problem.problem_id==curr_problem_id).first()
         prblm.problem_time = datetime.timestamp(datetime.now())
         # 对数据库的修改，应该放在最后，保证题目生成成功了再修改
 
@@ -167,6 +153,7 @@ def algorithm():
         return jsonify(data)
 
 @bluealgorithm.route("/problemlist", methods = ['GET'])
+@login_required
 def problemlist():
     problems = {
         # '最短路径': '/algorithm/dijkstra'
