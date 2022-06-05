@@ -28,33 +28,61 @@ def get_data_sha():
     data_sha = hashlib.sha256((str(time)+str(salt)).encode('utf-8')).hexdigest() 
     return data_sha 
 
+def run_algorithm_get(type:int,data_sha:str):
+    from views.run import run
+    filepath_in, filepath_ans, filepath_problem, filepath_image = run(type,data_sha)
+
+    # 读文件
+    file_problem = open(filepath_problem,"r")
+    data_problem = file_problem.read()
+    file_problem.close()
+
+    # 读取图片
+    file_image = open(filepath_image, "rb")
+    data_image = file_image.read()
+    data_image = base64.b64encode(data_image)
+    file_image.close()
+
+    # 返回题目
+    data = {
+        'problem_id' : data_sha,
+        'data_problem': data_problem,
+        'data_image': data_image.decode(),
+    }
+
+    return data
+
+def run_algorithm_post(data_input:str):
+    # data_input = request.get_json()
+    # print(request.get_json())
+
+    filepath_ans = './data/answer/' + data_input['problem_id'] + '.ans' #答案地址
+
+    file_ans = open(filepath_ans,"r")
+    data_ans = file_ans.read()
+    file_ans.close()
+
+    last_answer = data_input['answer']
+
+    filepath_last_ans = './data/record/' + data_input['problem_id'] + '.ans' #上次提交的答案
+    file_last = open(filepath_last_ans,"w")
+    file_last.write(str(last_answer))
+    file_last.close()
+
+    data = {
+        'answer': data_ans==data_input['answer'],
+        'right_answer': data_ans,
+    }
+    return data
+
 @bluealgorithm.route('/algorithm/dijkstra', methods = ['GET', 'POST'])
 def dijkstra():
     if request.method == 'GET':
-        # 生成题目和答案
+        # 新题目的标志
         data_sha = get_data_sha()
 
-        from views.run import run
-        filepath_in, filepath_ans, filepath_problem, filepath_image = run(0,data_sha)
-
-        # 读文件
-        file_problem = open(filepath_problem,"r")
-        data_problem = file_problem.read()
-        file_problem.close()
-
-        # 读取图片
-        file_image = open(filepath_image, "rb")
-        data_image = file_image.read()
-        data_image = base64.b64encode(data_image)
-        file_image.close()
-
-        # 返回题目
-        data = {
-            # 'N': N,
-            'problem_id' : data_sha,
-            'data_problem': data_problem,
-            'data_image': data_image.decode(),
-        }
+        # 得到一份新题目
+        data = run_algorithm_get(0,data_sha)
 
         # 对数据库的修改，应该放在最后，保证题目生成成功了再修改
         prblm = Problem(username=current_user.id, problem_id=data_sha, problem_type=0, status = 0)
@@ -65,23 +93,9 @@ def dijkstra():
         data_input = request.get_json()
         print(request.get_json())
 
-        filepath_ans = './data/answer/' + data_input['problem_id'] + '.ans' #答案地址
+        data = run_algorithm_post(data_input)
 
-        file_ans = open(filepath_ans,"r")
-        data_ans = file_ans.read()
-        file_ans.close()
-
-        last_answer = data_input['answer']
-
-        filepath_last_ans = './data/record/' + data_input['problem_id'] + '.ans' #上次提交的答案
-        file_last = open(filepath_last_ans,"w")
-        file_last.write(str(last_answer))
-        file_last.close()
-
-        data = {
-            'answer': data_ans==data_input['answer'],
-            'right_answer': data_ans,
-        }
+        # 对数据库的修改，应该放在最后，保证题目生成成功了再修改
         return jsonify(data)
 
 @bluealgorithm.route("/problemlist", methods = ['GET'])
