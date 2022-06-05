@@ -12,6 +12,10 @@ python3 manage.py
 flask init-db --drop
 ```
 
+其他数据库操作：
+
+https://segmentfault.com/a/1190000041646505
+
 
 下面的启动命令已作废
 ```shell

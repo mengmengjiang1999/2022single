@@ -4,6 +4,8 @@ blueproblem=Blueprint('problem',__name__)   #蓝图的对象的名称=Blueprint(
 from flask import request, jsonify
 from flask_login import login_required, current_user
 
+from datetime import datetime 
+
 # ALGORITHM_TYPE,ALGORITHM_NUMBER
 
 from models import Problem
@@ -13,6 +15,8 @@ def query_problems(username):
     return prblm
 
 ALGORITHM_TYPE = ['单源最短路','旅行商问题','支撑树计数','根数计数']
+
+PROBLEM_STATUS = ['未完成','✅','❌']
 
 ALGORITHM_NUMBER = len(ALGORITHM_TYPE)
 
@@ -53,19 +57,32 @@ def records():
     print("做题记录")
     print(prblm)
     data = []
+
+    data_fake = [
+        {
+            'problem_id': "233",
+            'username': "233",
+            'problem_type': 0,
+            'problem_status': 0,
+            'problem_time': "233",
+        }
+    ]
     for i in range(len(prblm)):
         item = prblm[i]
         data2 ={
-            'problem_id': item.problem_id,
+            'id': item.id,
+            'problem_id':item.problem_id,
             'username': item.username,
             'problem_type': ALGORITHM_TYPE[item.problem_type],
-            'status': item.status,
+            'problem_status': PROBLEM_STATUS[item.status],
+            'problem_time':  datetime.fromtimestamp(item.problem_time)
         }
         print(item.id)
         print(item.username)
         print(item.problem_type)
         print(item.status)
         data.append(data2)
+    # print("data",data)
     return jsonify({'data':data})
 
 @blueproblem.route("/record", methods = ['GET'])

@@ -1,4 +1,6 @@
 from flask import Blueprint
+
+from views.problem import ALGORITHM_TYPE
 bluealgorithm=Blueprint('algorithm',__name__)   #蓝图的对象的名称=Blueprint('自定义蓝图名称',__name__) 
 
 from flask import request, jsonify
@@ -50,6 +52,8 @@ def run_algorithm_get(type:int,data_sha:str):
     return data
 
 def run_algorithm_post(data_input:str):
+
+    print("ddddddd")
     filepath_ans = './data/answer/' + data_input['problem_id'] + '.ans' #答案地址
 
     file_ans = open(filepath_ans,"r")
@@ -67,28 +71,32 @@ def run_algorithm_post(data_input:str):
         'answer': data_ans==data_input['answer'],
         'right_answer': data_ans,
     }
+
+    print(data)
     return data
 
 @bluealgorithm.route('/algorithm', methods = ['GET', 'POST'])
-def dijkstra():
-    data_input = request.get_json()
-    print(data_input)
-    curr_problem_type = 0
-
-    # if data_input['problem_type'] == 'shortestpath':
-    #     curr_problem_type = 0
-    # elif data_input['problem_type'] == 'tsp':
-    #     curr_problem_type = 1
-    # elif data_input['problem_type'] == 'spancount':
-    #     curr_problem_type = 2
-    # elif data_input['problem_type'] == 'rootcount':
-    #     curr_problem_type = 3
-    # else:
-    #     return jsonify({
-    #     'status' : "FAIL" 
-    # })
+def algorithm():
+    print("current_user",current_user)
+    print("current_user_id",current_user.id)
 
     if request.method == 'GET':
+        data_input = request.args
+        print(data_input)
+        curr_problem_type = 0
+
+        if data_input.get('problem_type') == 'shortestpath':
+            curr_problem_type = 0
+        elif data_input.get('problem_type') == 'tsp':
+            curr_problem_type = 1
+        elif data_input.get('problem_type') == 'spancount':
+            curr_problem_type = 2
+        elif data_input.get('problem_type') == 'rootcount':
+            curr_problem_type = 3
+        else:
+            return jsonify({
+            'status' : "FAIL" 
+        })
         # 新题目的标志
         data_sha = get_data_sha()
 
@@ -96,11 +104,13 @@ def dijkstra():
         data = run_algorithm_get(0,data_sha)
 
         # 对数据库的修改，应该放在最后，保证题目生成成功了再修改
-        prblm = Problem(username=current_user.id, 
+        prblm = Problem(
+            username=current_user.id, 
             problem_time = datetime.timestamp(datetime.now()),
             problem_id=data_sha, 
             problem_type=curr_problem_type, 
-            status = 0)
+            status = 0
+        )
         db.session.add(prblm)
         db.session.commit()
         return jsonify(data)
@@ -110,12 +120,30 @@ def dijkstra():
         data = run_algorithm_post(data_input)
         curr_problem_id = data_input['problem_id']
 
-        prblm = Problem.query.get(
-            username=current_user.id, 
-            problem_id = curr_problem_id,
-            problem_type=curr_problem_type)
+        curr_problem_type=0
+        if data_input['problem_type'] == 'shortestpath':
+            curr_problem_type = 0
+        elif data_input['problem_type'] == 'tsp':
+            curr_problem_type = 1
+        elif data_input['problem_type'] == 'spancount':
+            curr_problem_type = 2
+        elif data_input['problem_type'] == 'rootcount':
+            curr_problem_type = 3
+        else:
+            return jsonify({
+            'status' : "FAIL" 
+        })
+        print("curr_problem_id",curr_problem_id)
+
+        prblm = Problem.query.filter(and_(
+            Problem.problem_id==curr_problem_id,
+            Problem.problem_type==curr_problem_type)).first()
         prblm.problem_time = datetime.timestamp(datetime.now())
         # 对数据库的修改，应该放在最后，保证题目生成成功了再修改
+
+        for item in data:
+            print(item)
+
         if data['answer']==True:
             prblm.status = 1
         else:
@@ -130,18 +158,22 @@ def problemlist():
         # '最短路径': '/algorithm/dijkstra'
         'algorithms':[
             {
+                'id':'P1000',
                 'problem': '单源最短路',
                 'algorithm': 'dijkstra',
             },
             {
+                'id':'P1001',
                 'problem': '旅行商问题',
                 'algorithm': 'fzdjf',
             },
             {
+                'id':'P1002',
                 'problem': '支撑树计数',
                 'algorithm': 'treecnt',
             },
             {
+                'id':'P1003',
                 'problem': '根数计数',
                 'algorithm': 'rootcnt',
             },

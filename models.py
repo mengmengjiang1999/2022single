@@ -20,7 +20,7 @@ class Problem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     # username = db.Column()
     username = db.Column(db.String(80), unique=False)
-    problem_id = db.Column(db.String(50), unique=True, nullable=False)
+    problem_id = db.Column(db.String(120), unique=True, nullable=False)
     problem_type = db.Column(db.Integer, unique=False, nullable=False)
     status = db.Column(db.Integer, unique=False, nullable=False)
     # status: 0:还未做，1:做了答案正确，2：做了，答案错误

@@ -27,7 +27,7 @@ DENSITY = 0.5
 
 
 # 注意：出题时编号从0开始
-# N: 结点数
+# N: 结点
 # 返回值：list[(int,int,int)], int, int
 # 返回值表示边列表、起始点、终点
 def gen_edges(N):
@@ -62,14 +62,10 @@ def gen_data(N, S, T, edges):
 
 def gen_problem(S,T):
     problem = '''
-### dijkstra算法求最短路
 
-请使用dijkstra算法求最短路径 \n
+### 根数计数
 
-下图中，编号为 '''+str(S)+''' 的结点是起点，编号为 '''+str(T)+''' 是终点。请计算从起点到终点的最短路。\n
+求下图中根树的数目。
 
-答案为一个正整数，如果从起点到终点不存在一条路径，请提交2147483647。
-
-<!-- ![dijkstra.png](/Users/chenzm/Projects/2022/2022single/images/dijkstra.png)  -->
     '''
     return problem
