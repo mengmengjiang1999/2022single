@@ -271,6 +271,7 @@ def clean_session():
 
 
 @app.route('/algorithm/dijkstra', methods = ['GET', 'POST'])
+@login_required
 def dijkstra():
     if request.method == 'GET':
         # N = request.form['N']
@@ -380,18 +381,54 @@ def problemlist():
         # '最短路径': '/algorithm/dijkstra'
         'algorithms':[
             {
-                'problem': 'shortest path',
+                'problem': '单源最短路',
                 'algorithm': 'dijkstra',
             },
             {
-                'problem': 'TSP',
+                'problem': '旅行商问题',
                 'algorithm': 'fzdjf',
+            },
+            {
+                'problem': '支撑树计数',
+                'algorithm': 'treecnt',
+            },
+            {
+                'problem': '根数计数',
+                'algorithm': 'rootcnt',
             },
         ]
     }
     return jsonify(problems)
 
-Algorithm_Type = ['shortest path','TSP']
+
+Algorithm_Type = ['单源最短路','旅行商问题','支撑树计数','根数计数']
+
+Algorithm_Number = len(Algorithm_Type)
+
+@app.route('/recommend', methods=['GET'])
+@login_required
+def recommend():
+    username = current_user.id
+    print("username",username)
+    prblm = query_problems(username)
+    print("做题记录")
+    type_counter = [[0,0]] * Algorithm_Number
+    cnt_all = len(prblm)
+    for item in prblm:
+        if item.status ==False:
+            type_counter[item.problem_type][0] += 1
+        else:
+            type_counter[item.problem_type][1] += 1
+
+    recommend_problems = []
+    for i in range(type_counter):
+        if type_counter[i][0]+type_counter[i][1]<(int)(cnt_all/Algorithm_Number):
+            recommend_problems.append(i)
+        if type_counter[i][0]*2>type_counter[i][1]:
+            recommend_problems.append(i)
+    
+    return jsonify({'recommend': recommend_problems})
+
 
 @app.route("/records", methods = ['GET'])
 @login_required
