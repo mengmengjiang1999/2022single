@@ -28,6 +28,7 @@ def run_algorithm_get(type:int,data_sha:str):
     from views.run import run
     filepath_in, filepath_ans, filepath_problem, filepath_image = run(type,data_sha)
     
+    print(data_sha)
     # 读文件
     file_problem = open(filepath_problem,"r")
     data_problem = file_problem.read()
@@ -68,8 +69,25 @@ def run_algorithm_post(data_input:str):
     }
     return data
 
-@bluealgorithm.route('/algorithm/shortestpath', methods = ['GET', 'POST'])
+@bluealgorithm.route('/algorithm', methods = ['GET', 'POST'])
 def dijkstra():
+    data_input = request.get_json()
+    print(data_input)
+    curr_problem_type = 0
+
+    # if data_input['problem_type'] == 'shortestpath':
+    #     curr_problem_type = 0
+    # elif data_input['problem_type'] == 'tsp':
+    #     curr_problem_type = 1
+    # elif data_input['problem_type'] == 'spancount':
+    #     curr_problem_type = 2
+    # elif data_input['problem_type'] == 'rootcount':
+    #     curr_problem_type = 3
+    # else:
+    #     return jsonify({
+    #     'status' : "FAIL" 
+    # })
+
     if request.method == 'GET':
         # 新题目的标志
         data_sha = get_data_sha()
@@ -78,7 +96,11 @@ def dijkstra():
         data = run_algorithm_get(0,data_sha)
 
         # 对数据库的修改，应该放在最后，保证题目生成成功了再修改
-        prblm = Problem(username=current_user.id, problem_time = datetime.timestamp(datetime.now()),problem_id=data_sha, problem_type=0, status = 0)
+        prblm = Problem(username=current_user.id, 
+            problem_time = datetime.timestamp(datetime.now()),
+            problem_id=data_sha, 
+            problem_type=curr_problem_type, 
+            status = 0)
         db.session.add(prblm)
         db.session.commit()
         return jsonify(data)
@@ -86,11 +108,12 @@ def dijkstra():
         data_input = request.get_json()
         print(request.get_json())
         data = run_algorithm_post(data_input)
-
         curr_problem_id = data_input['problem_id']
-        curr_problem_type=0
 
-        prblm = Problem.query.get(username=current_user.id, problem_id = curr_problem_id,problem_type=curr_problem_type)
+        prblm = Problem.query.get(
+            username=current_user.id, 
+            problem_id = curr_problem_id,
+            problem_type=curr_problem_type)
         prblm.problem_time = datetime.timestamp(datetime.now())
         # 对数据库的修改，应该放在最后，保证题目生成成功了再修改
         if data['answer']==True:

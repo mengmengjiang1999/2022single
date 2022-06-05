@@ -119,7 +119,7 @@ def run(problem_type:int,problem_sha:str):
     from dots.dots import generate_dot, generate_png
     filepath_dot = filepath_pre_dot + problem_sha + '.dot'
     with open(filepath_dot,"w") as file_dot:
-        file_dot.write(generate_dot(problem_sha,edges))
+        file_dot.write(generate_dot("pic",edges))
     generate_png(filepath_dot, filepath_image)
 
     print("filepath-problem",filepath_problem)
