@@ -1,7 +1,7 @@
 from flask import Blueprint
 blueuser=Blueprint('user',__name__)   #蓝图的对象的名称=Blueprint('自定义蓝图名称',__name__) 
 
-from flask import Flask, escape, url_for, request, render_template, jsonify, json, redirect, session,flash
+from flask import request, jsonify
 
 from flask_login import LoginManager
 from flask_login import UserMixin, login_user, logout_user, login_required, current_user
