@@ -52,8 +52,6 @@ def run_algorithm_get(type:int,data_sha:str):
     return data
 
 def run_algorithm_post(data_input:str):
-
-    print("ddddddd")
     filepath_ans = './data/answer/' + data_input['problem_id'] + '.ans' #答案地址
 
     file_ans = open(filepath_ans,"r")

@@ -10,8 +10,8 @@ from datetime import datetime
 
 from models import Problem
 
-def query_problems(username):
-    prblm = Problem.query.filter(Problem.username == username).all()
+def query_problems_of(username):
+    prblm = Problem.query.filter(Problem.username == username).order_by(Problem.problem_time.desc()).all()
     return prblm
 
 ALGORITHM_TYPE = ['单源最短路','旅行商问题','支撑树计数','根数计数']
@@ -28,7 +28,7 @@ import os
 def recommend():
     username = current_user.id
     print("username",username)
-    prblm = query_problems(username)
+    prblm = query_problems_of(username)
     print("做题记录")
     type_counter = [[0,0]] * ALGORITHM_NUMBER
     cnt_all = len(prblm)
@@ -52,21 +52,9 @@ def recommend():
 @login_required
 def records():
     username = current_user.id
-    print("username",username)
-    prblm = query_problems(username)
-    print("做题记录")
-    print(prblm)
+    prblm = query_problems_of(username)
     data = []
 
-    data_fake = [
-        {
-            'problem_id': "233",
-            'username': "233",
-            'problem_type': 0,
-            'problem_status': 0,
-            'problem_time': "233",
-        }
-    ]
     for i in range(len(prblm)):
         item = prblm[i]
         data2 ={
