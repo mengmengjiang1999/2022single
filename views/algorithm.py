@@ -16,17 +16,19 @@ import base64
 import os
 import random
 
-class Problem(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    # username = db.Column()
-    username = db.Column(db.String(80), unique=False)
-    problem_id = db.Column(db.String(50), unique=True, nullable=False)
-    problem_type = db.Column(db.Integer, unique=False, nullable=False)
-    status = db.Column(db.Integer, unique=False, nullable=False)
-    # status: 0:还未做，1:做了答案正确，2：做了，答案错误
+from models import Problem
+
+# class Problem(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     # username = db.Column()
+#     username = db.Column(db.String(80), unique=False)
+#     problem_id = db.Column(db.String(50), unique=True, nullable=False)
+#     problem_type = db.Column(db.Integer, unique=False, nullable=False)
+#     status = db.Column(db.Integer, unique=False, nullable=False)
+#     # status: 0:还未做，1:做了答案正确，2：做了，答案错误
  
-    def __repr__(self):
-        return "id : {self.id}, problem_id: {self.problem_id}, status: {self.status}"
+#     def __repr__(self):
+#         return "id : {self.id}, problem_id: {self.problem_id}, status: {self.status}"
 
 def query_problems(username):
     prblm = Problem.query.filter(Problem.username == username).all()

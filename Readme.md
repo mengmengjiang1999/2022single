@@ -6,13 +6,15 @@
 
 本单机版app已经升级为功能齐全的后端
 ```shell
-python3 app.py
+python3 manage.py
 ```
 
 
-下面的已作废
+下面的启动命令已作废
 ```shell
 python3 run.py
+
+python3 app.py
 ```
 
 每次运行可以随机生成一个题目。题面地址为`'./data/problem.md'`，题目用到的图片地址为`'./images/dijkstra.png'`，答案地址为`'./data/data.ans'`。

@@ -11,8 +11,11 @@ app = Flask(__name__)
 # adding configuration for using a sqlite database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
  
+
+from models import db
 # Creating an SQLAlchemy instance
-db = SQLAlchemy(app)
+# db = SQLAlchemy(app)
+db.init_app(app)
 
 # Import for Migrations
 from flask_migrate import Migrate, migrate

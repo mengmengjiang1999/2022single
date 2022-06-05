@@ -9,6 +9,9 @@ from flask_login import UserMixin, login_user, logout_user, login_required, curr
 from sqlalchemy import and_, false, or_, true
 from app import db,app
 
+from models import Userinfo
+
+
 login_manager = LoginManager()
 login_manager.login_view = 'login'
 login_manager.login_message_category = 'info'
@@ -18,14 +21,14 @@ login_manager.init_app(app)
 class User(UserMixin):
     pass
 
-class Userinfo(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True)
-    password = db.Column(db.String(256), unique=False)
-    email = db.Column(db.String(120), unique=True)
+# class Userinfo(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     username = db.Column(db.String(80), unique=True)
+#     password = db.Column(db.String(256), unique=False)
+#     email = db.Column(db.String(120), unique=True)
 
-    def __repr__(self):
-        return '<User %r>' % self.username
+#     def __repr__(self):
+#         return '<User %r>' % self.username
 
 @login_manager.user_loader
 def load_user(username):
