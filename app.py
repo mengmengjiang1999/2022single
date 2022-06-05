@@ -20,12 +20,7 @@ import random
 from datetime import datetime
 import hashlib
 
-import base64
-def stringToBase64(s):
-    return base64.b64encode(s.encode('utf-8'))
-
-def base64ToString(b):
-    return base64.b64decode(b).decode('utf-8')
+from tools import stringToBase64,base64ToString
 
 # from flask_sqlalchemy import SQLAlchemy  # 导入扩展类
 
@@ -48,25 +43,29 @@ migrate = Migrate(app, db)
 app.secret_key= '23232333'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 
+
+from views.user import blueuser
+
+app.register_blueprint(blueuser)
+
 # login_manager = LoginManager()  # 实例化登录管理对象
 # login_manager.init_app(app)  # 初始化应用
 # login_manager.login_view = 'login'  # 设置用户登录视图函数 endpoint
 
-login_manager = LoginManager()
-login_manager.login_view = 'login'
-login_manager.login_message_category = 'info'
-login_manager.login_message = 'Access denied.'
-login_manager.init_app(app)
+# login_manager = LoginManager()
+# login_manager.login_view = 'login'
+# login_manager.login_message_category = 'info'
+# login_manager.login_message = 'Access denied.'
+# login_manager.init_app(app)
 
 
+# @login_manager.user_loader
+# def load_user(username):
+#     if query_user(username) is not None:
+#         curr_user = User()
+#         curr_user.id = username
 
-@login_manager.user_loader
-def load_user(username):
-    if query_user(username) is not None:
-        curr_user = User()
-        curr_user.id = username
-
-        return curr_user
+#         return curr_user
 
 from werkzeug.security import generate_password_hash
 import uuid
@@ -93,7 +92,7 @@ class Problem(db.Model):
  
     def __repr__(self):
         return "id : {self.id}, problem_id: {self.problem_id}, status: {self.status}"
-
+'''
 class Userinfo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True)
@@ -129,17 +128,6 @@ def valid_regist(username, email):
         return False
     else:
         return True
-
-# # 登录
-# def login_required(func):
-#     @wraps(func)
-#     def wrapper(*args, **kwargs):
-#         if session.get('username'):
-#             return func(*args, **kwargs)
-#         else:
-#             # return redirect(url_for('login', next=request.url)) # 
-#             return {'error': "error"}
-#     return wrapper
 
 # 4.注册
 @app.route('/regist', methods=['GET','POST'])
@@ -199,12 +187,7 @@ def login_status():
         data['status']=True
         data['username']=current_user.id
     return jsonify(data)
-
-@app.route('/test', methods=['GET','POST'])
-def test():
-    print(request.form)
-    return "haha"
-
+'''
 '''
 # @app.route('/login', methods=['GET', 'POST'])
 # def login():
@@ -247,6 +230,7 @@ def test():
 #     return jsonify(data)
 '''
 
+'''
 @app.route('/logout', methods=['GET', 'POST'])
 @login_required
 def logout():
@@ -258,17 +242,8 @@ def clean_session():
     session.clear()
     print("session")
     print(session)
-    return jsonify({})
-
-# # 5.个人中心
-# @app.route('/panel')
-# @login_required
-# def panel():
-#     username = session.get('username')
-#     user = User.query.filter(User.username == username).first()
-#     return render_template("panel.html", user=user)
-
-
+    return jsonify(\{\})
+'''
 
 @app.route('/algorithm/dijkstra', methods = ['GET', 'POST'])
 @login_required

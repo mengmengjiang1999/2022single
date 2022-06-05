@@ -94,3 +94,8 @@ https://www.cnblogs.com/hhh5460/p/9745812.html
 http://www.ityouknow.com/python/2019/11/13/python-web-flask-login-057.html
 
 pip3 install flask-login
+
+<!-- 关于分文件 -->
+
+flask蓝图
+https://cloud.tencent.com/developer/article/1648137
