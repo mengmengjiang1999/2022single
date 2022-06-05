@@ -13,8 +13,10 @@ flask init-db --drop
 ```
 
 其他数据库操作：
-
+增删改查
 https://segmentfault.com/a/1190000041646505
+排序
+https://www.cxyzjd.com/article/qq_45696681/102612372
 
 
 下面的启动命令已作废

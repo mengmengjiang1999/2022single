@@ -101,7 +101,7 @@ def gen_input_files(type:int):
     else:
         pass
 
-def run(problem_type:int,problem_sha:str):
+def run(problem_type:int,problem_sha:str,need_run:bool=False):
     # 对于所有题目的通用流程
     filepath_in = filepath_pre_in +  problem_sha + '.in' #输入数据地址
     filepath_ans = filepath_pre_answer + problem_sha + '.ans' #答案地址
@@ -109,6 +109,12 @@ def run(problem_type:int,problem_sha:str):
     filepath_problem_html = filepath_pre_html + problem_sha + '.html' #题面地址
     filepath_image = filepath_pre_image + problem_sha + '.png' #图片地址
 
+    # 如果不需要运行，那么只要返回路径
+    if not need_run:
+        return filepath_in, filepath_ans, filepath_problem_html, filepath_image
+    
+    # 如果需要真的生成新的题目，再生成
+    # 这里是生成新数据的地方
     edges,data,problem = gen_input_files(problem_type)
 
     with open(filepath_in,"w") as file_in:
