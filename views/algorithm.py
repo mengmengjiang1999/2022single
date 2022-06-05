@@ -18,10 +18,6 @@ import random
 
 from models import Problem
 
-def query_problems(username):
-    prblm = Problem.query.filter(Problem.username == username).all()
-    return prblm
-
 def get_data_sha():
     time = datetime.timestamp(datetime.now())
     salt = random.randint(0,1000)
@@ -31,7 +27,7 @@ def get_data_sha():
 def run_algorithm_get(type:int,data_sha:str):
     from views.run import run
     filepath_in, filepath_ans, filepath_problem, filepath_image = run(type,data_sha)
-
+    
     # 读文件
     file_problem = open(filepath_problem,"r")
     data_problem = file_problem.read()
@@ -53,9 +49,6 @@ def run_algorithm_get(type:int,data_sha:str):
     return data
 
 def run_algorithm_post(data_input:str):
-    # data_input = request.get_json()
-    # print(request.get_json())
-
     filepath_ans = './data/answer/' + data_input['problem_id'] + '.ans' #答案地址
 
     file_ans = open(filepath_ans,"r")
@@ -75,7 +68,7 @@ def run_algorithm_post(data_input:str):
     }
     return data
 
-@bluealgorithm.route('/algorithm/dijkstra', methods = ['GET', 'POST'])
+@bluealgorithm.route('/algorithm/shortestpath', methods = ['GET', 'POST'])
 def dijkstra():
     if request.method == 'GET':
         # 新题目的标志
@@ -85,17 +78,27 @@ def dijkstra():
         data = run_algorithm_get(0,data_sha)
 
         # 对数据库的修改，应该放在最后，保证题目生成成功了再修改
-        prblm = Problem(username=current_user.id, problem_id=data_sha, problem_type=0, status = 0)
+        prblm = Problem(username=current_user.id, problem_time = datetime.timestamp(datetime.now()),problem_id=data_sha, problem_type=0, status = 0)
         db.session.add(prblm)
         db.session.commit()
         return jsonify(data)
     elif request.method == 'POST':
         data_input = request.get_json()
         print(request.get_json())
-
         data = run_algorithm_post(data_input)
 
+        curr_problem_id = data_input['problem_id']
+        curr_problem_type=0
+
+        prblm = Problem.query.get(username=current_user.id, problem_id = curr_problem_id,problem_type=curr_problem_type)
+        prblm.problem_time = datetime.timestamp(datetime.now())
         # 对数据库的修改，应该放在最后，保证题目生成成功了再修改
+        if data['answer']==True:
+            prblm.status = 1
+        else:
+            prblm.status = 2
+        db.session.commit()
+
         return jsonify(data)
 
 @bluealgorithm.route("/problemlist", methods = ['GET'])

@@ -109,14 +109,6 @@ def run(problem_type:int,problem_sha:str):
     filepath_problem_html = filepath_pre_html + problem_sha + '.html' #题面地址
     filepath_image = filepath_pre_image + problem_sha + '.png' #图片地址
 
-    # from algorithm.shortestpath.generator import N_min, N_max, gen_edges, gen_data, gen_problem
-
-    # 生成数据并写入，运算，给出答案
-    # N = random.randint(N_min,N_max)
-    # edges, S, T = gen_edges(N)
-    # data = gen_data(N, S, T, edges)
-    # problem = gen_problem(S, T)
-
     edges,data,problem = gen_input_files(problem_type)
 
     with open(filepath_in,"w") as file_in:
@@ -129,7 +121,10 @@ def run(problem_type:int,problem_sha:str):
     with open(filepath_dot,"w") as file_dot:
         file_dot.write(generate_dot(problem_sha,edges))
     generate_png(filepath_dot, filepath_image)
-    os.system('rm '+filepath_dot)
+
+    print("filepath-problem",filepath_problem)
+    print("filepath-image",filepath_image)
+    # os.system('rm '+filepath_dot)
 
     # 写题面
     with open(filepath_problem, "w") as file_problem:

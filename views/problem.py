@@ -3,9 +3,14 @@ blueproblem=Blueprint('problem',__name__)   #蓝图的对象的名称=Blueprint(
 
 from flask import request, jsonify
 from flask_login import login_required, current_user
-from app import query_problems
 
 # ALGORITHM_TYPE,ALGORITHM_NUMBER
+
+from models import Problem
+
+def query_problems(username):
+    prblm = Problem.query.filter(Problem.username == username).all()
+    return prblm
 
 ALGORITHM_TYPE = ['单源最短路','旅行商问题','支撑树计数','根数计数']
 
@@ -47,7 +52,6 @@ def records():
     prblm = query_problems(username)
     print("做题记录")
     print(prblm)
-    print(prblm[0])
     data = []
     for i in range(len(prblm)):
         item = prblm[i]

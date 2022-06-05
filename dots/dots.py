@@ -9,4 +9,6 @@ def generate_dot(picname, edges):
     return s
 
 def generate_png(dotfilename,pngfilename):
+    print("generate_png")
     os.system('dot -Tpng ' + dotfilename + ' -o ' + pngfilename)
+    print("generate_png")

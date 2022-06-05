@@ -24,6 +24,8 @@ class Problem(db.Model):
     problem_type = db.Column(db.Integer, unique=False, nullable=False)
     status = db.Column(db.Integer, unique=False, nullable=False)
     # status: 0:还未做，1:做了答案正确，2：做了，答案错误
+    problem_time = db.Column(db.Integer, unique=False, nullable=False)
+    # 表示题目创建的时间，或上次提交答案的时间
  
     def __repr__(self):
         return "id : {self.id}, problem_id: {self.problem_id}, status: {self.status}"

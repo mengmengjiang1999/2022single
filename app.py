@@ -29,8 +29,8 @@ app.secret_key= '23232333'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 
 
-from views.user import blueuser,Userinfo
-from views.algorithm import bluealgorithm,query_problems
+from views.user import blueuser
+from views.algorithm import bluealgorithm
 from views.tool import bluetool
 from views.test import bluetest
 from views.problem import blueproblem
