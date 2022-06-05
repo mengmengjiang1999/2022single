@@ -18,77 +18,48 @@ import random
 
 from models import Problem
 
-# class Problem(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     # username = db.Column()
-#     username = db.Column(db.String(80), unique=False)
-#     problem_id = db.Column(db.String(50), unique=True, nullable=False)
-#     problem_type = db.Column(db.Integer, unique=False, nullable=False)
-#     status = db.Column(db.Integer, unique=False, nullable=False)
-#     # status: 0:还未做，1:做了答案正确，2：做了，答案错误
- 
-#     def __repr__(self):
-#         return "id : {self.id}, problem_id: {self.problem_id}, status: {self.status}"
-
 def query_problems(username):
     prblm = Problem.query.filter(Problem.username == username).all()
     return prblm
-    # plm = Problem.query.filter(Problem.)
+
+def get_data_sha():
+    time = datetime.timestamp(datetime.now())
+    salt = random.randint(0,1000)
+    data_sha = hashlib.sha256((str(time)+str(salt)).encode('utf-8')).hexdigest() 
+    return data_sha 
 
 @bluealgorithm.route('/algorithm/dijkstra', methods = ['GET', 'POST'])
 def dijkstra():
     if request.method == 'GET':
-        # N = request.form['N']
-
         # 生成题目和答案
-        N = random.randint(5,8)
+        data_sha = get_data_sha()
 
-        from run import run
+        from views.run import run
+        filepath_in, filepath_ans, filepath_problem, filepath_image = run(0,data_sha)
 
-        filepath_in, filepath_ans, filepath_problem, filepath_image = run()
-
-        # file_in = open(filepath_in,"r")
-        # data_in = file_in.read()
-        # file_in.close()
-
-        time = datetime.timestamp(datetime.now())
-        # print(time)
-        data_sha = hashlib.sha256(str(time).encode('utf-8')).hexdigest()  
-        print(data_sha) 
-        
-        # problem_id = data_sha
-
-        # 对数据库的修改
-        prblm = Problem(username=current_user.id, problem_id=data_sha, problem_type=0, status = 0)
-        db.session.add(prblm)
-        db.session.commit()
-
-        # 保存答案
-        os.system('cp ' + filepath_problem + ' ./data/problem/' + str(data_sha) + '.problem')
-        os.system('cp ' + filepath_ans + ' ./data/answer/' + str(data_sha) + '.ans')
-        os.system('cp ' + filepath_image + ' ./data/image/' + str(data_sha) + '.png')
-
-        # file_ans = open(filepath_ans,"r")
-        # data_ans = file_ans.read()
-        # file_ans.close()
-
+        # 读文件
         file_problem = open(filepath_problem,"r")
         data_problem = file_problem.read()
         file_problem.close()
 
+        # 读取图片
         file_image = open(filepath_image, "rb")
         data_image = file_image.read()
         data_image = base64.b64encode(data_image)
-        # print(data_image)
         file_image.close()
 
         # 返回题目
         data = {
-            'N': N,
+            # 'N': N,
             'problem_id' : data_sha,
             'data_problem': data_problem,
             'data_image': data_image.decode(),
         }
+
+        # 对数据库的修改，应该放在最后，保证题目生成成功了再修改
+        prblm = Problem(username=current_user.id, problem_id=data_sha, problem_type=0, status = 0)
+        db.session.add(prblm)
+        db.session.commit()
         return jsonify(data)
     elif request.method == 'POST':
         data_input = request.get_json()

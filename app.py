@@ -45,7 +45,7 @@ from werkzeug.security import generate_password_hash
 
 import click
 
-@app.cli.command()  # 注册为命令
+@app.cli.command('init-db')  # 注册为命令
 @click.option('--drop', is_flag=True, help='Create after drop.')  # 设置选项
 def initdb(drop):
     """Initialize the database."""

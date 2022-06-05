@@ -7,6 +7,9 @@
 本单机版app已经升级为功能齐全的后端
 ```shell
 python3 manage.py
+
+
+flask init-db --drop
 ```
 
 

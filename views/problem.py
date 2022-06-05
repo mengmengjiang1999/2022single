@@ -5,12 +5,14 @@ from flask import request, jsonify
 from flask_login import login_required, current_user
 from app import query_problems
 
+# ALGORITHM_TYPE,ALGORITHM_NUMBER
+
+ALGORITHM_TYPE = ['单源最短路','旅行商问题','支撑树计数','根数计数']
+
+ALGORITHM_NUMBER = len(ALGORITHM_TYPE)
+
 import base64
 import os
-
-Algorithm_Type = ['单源最短路','旅行商问题','支撑树计数','根数计数']
-
-Algorithm_Number = len(Algorithm_Type)
 
 @blueproblem.route('/recommend', methods=['GET'])
 @login_required
@@ -19,7 +21,7 @@ def recommend():
     print("username",username)
     prblm = query_problems(username)
     print("做题记录")
-    type_counter = [[0,0]] * Algorithm_Number
+    type_counter = [[0,0]] * ALGORITHM_NUMBER
     cnt_all = len(prblm)
     for item in prblm:
         if item.status ==False:
@@ -29,7 +31,7 @@ def recommend():
 
     recommend_problems = []
     for i in range(type_counter):
-        if type_counter[i][0]+type_counter[i][1]<(int)(cnt_all/Algorithm_Number):
+        if type_counter[i][0]+type_counter[i][1]<(int)(cnt_all/ALGORITHM_NUMBER):
             recommend_problems.append(i)
         if type_counter[i][0]*2>type_counter[i][1]:
             recommend_problems.append(i)
@@ -52,7 +54,7 @@ def records():
         data2 ={
             'problem_id': item.problem_id,
             'username': item.username,
-            'problem_type': Algorithm_Type[item.problem_type],
+            'problem_type': ALGORITHM_TYPE[item.problem_type],
             'status': item.status,
         }
         print(item.id)
@@ -92,11 +94,11 @@ def get_cirten_record():
 
 def genenrate_files():
 # 进行预编译
-    from run import pre_compile
+    from views.run import pre_compile
     pre_compile()
 
     # 生成300个文件
-    from run import run
+    from views.run import run
 
     file_codelist = open('list.txt','r')
 
