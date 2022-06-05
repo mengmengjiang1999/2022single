@@ -80,13 +80,7 @@ def run_algorithm_post(data_input:str):
 def algorithm():
     if request.method == 'GET':
         data_input = request.args
-        print(data_input)
-
-        print("datainput_args")
-        print(data_input)
-
         problem_id = data_input.get('problem_id')
-
         print(problem_id)
 
         if not problem_id:
@@ -105,23 +99,35 @@ def algorithm():
                 'status' : "FAIL" 
             })
 
-            # 新题目的标志
-            data_sha = get_data_sha()
+            # 这个时候不能直接就来创造新的题目，还需要检查是否有未完成的题目
+            prblm = Problem.query.filter(
+                and_(Problem.problem_type==curr_problem_type,
+                Problem.username==current_user.id,Problem.status!=1)).first()
+            print(prblm)
+            if prblm is None:
+                # 新题目的标志
+                data_sha = get_data_sha()
 
-            # 得到一份新题目
-            data = run_algorithm_get(0,data_sha,True)
+                # 得到一份新题目
+                data = run_algorithm_get(0,data_sha,True)
 
-            # 对数据库的修改，应该放在最后，保证题目生成成功了再修改
-            prblm = Problem(
-                username=current_user.id, 
-                problem_time = datetime.timestamp(datetime.now()),
-                problem_id=data_sha, 
-                problem_type=curr_problem_type, 
-                status = 0
-            )
-            db.session.add(prblm)
-            db.session.commit()
-            return jsonify(data)
+                # 对数据库的修改，应该放在最后，保证题目生成成功了再修改
+                prblm = Problem(
+                    username=current_user.id, 
+                    problem_time = datetime.timestamp(datetime.now()),
+                    problem_id=data_sha, 
+                    problem_type=curr_problem_type, 
+                    status = 0
+                )
+                db.session.add(prblm)
+                db.session.commit()
+                return jsonify(data)
+            else:
+                # 该用户还有未完成的题目
+                data_sha = prblm.problem_id
+                # 取读取数据了
+                data = run_algorithm_get(0,data_sha,False)
+                return jsonify(data)
         else:
             data_sha = problem_id
             # 那么这就是取读取数据了
