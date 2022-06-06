@@ -1,4 +1,15 @@
 .DS_Store
 node_modules/
-data/
+data/*/*
+!data/problem.html
+!data/problem.md
+!data/problem.pdf
+!data/template.html
+!data/answer/.gitkeep
+!data/dot/.gitkeep
+!data/html/.gitkeep
+!data/image/.gitkeep
+!data/input/.gitkeep
+!data/problem/.gitkeep
+!data/record/.gitkeep
 images/
