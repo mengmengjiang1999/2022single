@@ -60,6 +60,9 @@ if __name__ == '__main__':
     from werkzeug.middleware.proxy_fix import ProxyFix
     app.wsgi_app = ProxyFix(app.wsgi_app)
 
+    from views.run import pre_compile
+
+    pre_compile()
     app.run(debug=True)
 
     # app.run()

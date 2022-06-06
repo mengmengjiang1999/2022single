@@ -22,7 +22,7 @@ FILEPATH_CODE_SPANCOUNT = './algorithm/spancount/program/spancount.cpp' #代码�
 FILEPATH_EXE_TSP = './algorithm/tsp/program/main' #可执行文件地址
 FILEPATH_CODE_TSP = './algorithm/tsp/program/tsp.cpp' #代码地址
 
-FILEPATH_EXE = [FILEPATH_EXE_SHORTESTPATH,FILEPATH_EXE_TSP,FILEPATH_CODE_SPANCOUNT,FILEPATH_CODE_ROOTCOUNT]
+FILEPATH_EXE = [FILEPATH_EXE_SHORTESTPATH,FILEPATH_EXE_TSP,FILEPATH_EXE_SPANCOUNT,FILEPATH_EXE_ROOTCOUNT]
 FILEPATH_CODE = [FILEPATH_CODE_SHORTESTPATH,FILEPATH_CODE_TSP,FILEPATH_CODE_SPANCOUNT,FILEPATH_CODE_ROOTCOUNT]
 
 def pre_compile():
@@ -67,7 +67,7 @@ def gen_input_files(type:int):
 
         return edges,data,problem
     elif type==1:
-        from algorithm.shortestpath.generator import N_min, N_max, gen_edges, gen_data, gen_problem
+        from algorithm.tsp.generator import N_min, N_max, gen_edges, gen_data, gen_problem
 
         # 生成数据并写入，运算，给出答案
         N = random.randint(N_min,N_max)
@@ -78,7 +78,7 @@ def gen_input_files(type:int):
         return edges,data,problem
 
     elif type==2:
-        from algorithm.shortestpath.generator import N_min, N_max, gen_edges, gen_data, gen_problem
+        from algorithm.spancount.generator import N_min, N_max, gen_edges, gen_data, gen_problem
 
         # 生成数据并写入，运算，给出答案
         N = random.randint(N_min,N_max)
@@ -89,7 +89,7 @@ def gen_input_files(type:int):
         return edges,data,problem
 
     elif type==3:
-        from algorithm.shortestpath.generator import N_min, N_max, gen_edges, gen_data, gen_problem
+        from algorithm.rootcount.generator import N_min, N_max, gen_edges, gen_data, gen_problem
 
         # 生成数据并写入，运算，给出答案
         N = random.randint(N_min,N_max)
@@ -109,9 +109,14 @@ def run(problem_type:int,problem_sha:str,need_run:bool=False):
     filepath_problem_html = filepath_pre_html + problem_sha + '.html' #题面地址
     filepath_image = filepath_pre_image + problem_sha + '.png' #图片地址
 
+    print("run函数")
+
     # 如果不需要运行，那么只要返回路径
     if not need_run:
         return filepath_in, filepath_ans, filepath_problem_html, filepath_image
+
+    print("生成新题目")
+    print("题目类型",problem_type)
     
     # 如果需要真的生成新的题目，再生成
     # 这里是生成新数据的地方
@@ -119,13 +124,18 @@ def run(problem_type:int,problem_sha:str,need_run:bool=False):
 
     with open(filepath_in,"w") as file_in:
         file_in.write(data)
+    # 执行
     os.system(FILEPATH_EXE[problem_type] +' < '+filepath_in+' > '+filepath_ans)
+
+    with open(filepath_ans,"r") as file_ans:
+        ans = file_ans.read()
+        print("新生成的题目答案是",ans)
 
     # 根据随机生成的结果来生成图片
     from dots.dots import generate_dot, generate_png
     filepath_dot = filepath_pre_dot + problem_sha + '.dot'
     with open(filepath_dot,"w") as file_dot:
-        file_dot.write(generate_dot("pic",edges))
+        file_dot.write(generate_dot("pic",edges,problem_type))
     generate_png(filepath_dot, filepath_image)
 
     print("filepath-problem",filepath_problem)

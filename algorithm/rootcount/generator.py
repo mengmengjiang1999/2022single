@@ -16,15 +16,12 @@ M + 1 行。
 
 输入数据保证w>0。'''
 
-
 N_max=8
 N_min=5
 W_min=1
 W_max=10
 
-
 DENSITY = 0.5
-
 
 # 注意：出题时编号从0开始
 # N: 结点
@@ -32,17 +29,16 @@ DENSITY = 0.5
 # 返回值表示边列表、起始点、终点
 def gen_edges(N):
     # 随机生成边序列
-    # edges := list[(int,int,int)]
     edges = []
-    for i in range(N):
-        for j in range(N):
+    for i in range(1,N+1,1):
+        for j in range(1,N+1,1):
             if i!=j:
                 rnd = random.random()
                 if rnd < DENSITY:
                     w = random.randint(W_min, W_max)
                     edges.append((i,j,w))
-    S = 0
-    T = N-1
+    S = 1
+    T = N
     return edges, S, T
 
 def gen_data(N, S, T, edges):
@@ -53,19 +49,10 @@ def gen_data(N, S, T, edges):
     for edge in edges:
         data = data + str(edge[0])+' '+str(edge[1])+' '+str(edge[2])+'\n'
     return data
-    # with open(filepath_in, "w") as f:
-    #     M = len(edges)
-    #     # f.write(str(N)+' '+str(M)+' '+str(S)+' '+str(T)+'\n')
-    #     for edge in edges:
-    #         data = data + str(edge[0])+' '+str(edge[1])+' '+str(edge[2])+'\n'
-            # f.write(str(edge[0])+' '+str(edge[1])+' '+str(edge[2])+'\n')
 
 def gen_problem(S,T):
     problem = '''
-
-### 根数计数
-
-求下图中根树的数目。
+对于下图给出的一个边上不带权的有向连通图G，计算该图所有的根树的数目。
 
     '''
     return problem

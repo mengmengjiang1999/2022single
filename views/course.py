@@ -1,5 +1,4 @@
 import json
-from turtle import home
 from flask import Blueprint
 bluecourse=Blueprint('course',__name__)   #蓝图的对象的名称=Blueprint('自定义蓝图名称',__name__) 
 
@@ -154,7 +153,7 @@ EMOJIS = ["✅","❌"]
 # 同学：展示我所有的作业，以及完成情况
 @bluecourse.route('/course/lookhomework', methods=['POST'])
 @login_required
-def homework_add():
+def homework_look():
     data_input = request.get_json()
     courseid = int(data_input['courseid'])
     # 根据课程id查找作业

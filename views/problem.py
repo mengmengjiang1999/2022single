@@ -65,12 +65,7 @@ def records():
             'problem_status': PROBLEM_STATUS[item.status],
             'problem_time':  datetime.fromtimestamp(item.problem_time)
         }
-        print(item.id)
-        print(item.username)
-        print(item.problem_type)
-        print(item.status)
         data.append(data2)
-    # print("data",data)
     return jsonify({'data':data})
 
 @blueproblem.route("/record", methods = ['GET'])
@@ -112,8 +107,6 @@ def genenrate_files():
     file_codelist = open('list.txt','r')
 
     codes = file_codelist.readlines()
-
-    print(len(codes))
 
     for i in range(len(codes)):
         print(i)

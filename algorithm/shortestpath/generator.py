@@ -23,7 +23,7 @@ W_min=1
 W_max=10
 
 
-DENSITY = 0.5
+DENSITY = 0.45
 
 
 # 注意：出题时编号从0开始

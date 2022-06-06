@@ -30,7 +30,6 @@ def run_algorithm_get(type:int,data_sha:str,need_run:bool=False):
     from views.run import run
     filepath_in, filepath_ans, filepath_problem, filepath_image = run(type,data_sha,need_run)
     
-    print(data_sha)
     # 读文件
     file_problem = open(filepath_problem,"r")
     data_problem = file_problem.read()
@@ -58,21 +57,24 @@ def run_algorithm_post(data_input:str):
     data_ans = file_ans.read()
     file_ans.close()
 
-    last_answer = data_input['answer']
+    last_answer = None
 
     filepath_last_ans = './data/record/' + data_input['problem_id'] + '.ans' #上次提交的答案
-    file_last = open(filepath_last_ans,"w")
-    file_last.write(str(last_answer))
-    file_last.close()
+    # with open(filepath_last_ans,"r") as file_last:
+    #     last_answer = file_last.read()
+    #     file_last.close()
 
-    print(data_ans)
+    with open(filepath_last_ans,"w") as file_last:
+        file_last.write(str(last_answer))
+        file_last.close()
 
+    print("run_algorithm_post data_ans",data_ans)
     data = {
         'answer': data_ans==data_input['answer'],
-        'right_answer': data_ans,
+        'last_answer': last_answer,
     }
 
-    print(data)
+    print("run_algorithm_post",data)
     return data
 
 @bluealgorithm.route('/algorithm', methods = ['GET', 'POST'])
@@ -81,18 +83,24 @@ def algorithm():
     if request.method == 'GET':
         data_input = request.args
         problem_id = data_input.get('problem_id')
-        print(problem_id)
+        print("algrithm_get",data_input)
+
+        curr_problem_type = 0
 
         if not problem_id:
             curr_problem_type = 0
 
             if data_input.get('problem_type') == 'shortestpath':
+                print("shortestpath")
                 curr_problem_type = 0
             elif data_input.get('problem_type') == 'tsp':
+                print("tsp")
                 curr_problem_type = 1
-            elif data_input.get('problem_type') == 'spancount':
+            elif data_input.get('problem_type') == 'spantree':
+                print("spantree")
                 curr_problem_type = 2
-            elif data_input.get('problem_type') == 'rootcount':
+            elif data_input.get('problem_type') == 'roottree':
+                print("roottree")
                 curr_problem_type = 3
             else:
                 return jsonify({
@@ -103,13 +111,17 @@ def algorithm():
             prblm = Problem.query.filter(
                 and_(Problem.problem_type==curr_problem_type,
                 Problem.username==current_user.id,Problem.status!=1)).first()
-            print(prblm)
+            print("algrithm_get-检查是否有未完成题目",prblm)
             if prblm is None:
                 # 新题目的标志
                 data_sha = get_data_sha()
 
                 # 得到一份新题目
-                data = run_algorithm_get(0,data_sha,True)
+                data = run_algorithm_get(curr_problem_type,data_sha,True)
+
+                print("新题目")
+
+                
 
                 # 对数据库的修改，应该放在最后，保证题目生成成功了再修改
                 prblm = Problem(
@@ -126,17 +138,17 @@ def algorithm():
                 # 该用户还有未完成的题目
                 data_sha = prblm.problem_id
                 # 取读取数据了
-                data = run_algorithm_get(0,data_sha,False)
+                data = run_algorithm_get(curr_problem_type,data_sha,False)
                 return jsonify(data)
         else:
             data_sha = problem_id
             # 那么这就是取读取数据了
-            data = run_algorithm_get(0,data_sha,False)
+            data = run_algorithm_get(curr_problem_type,data_sha,False)
             return jsonify(data)
         
     elif request.method == 'POST':
         data_input = request.get_json()
-        print(request.get_json())
+        print("algrithm_POST",request.get_json())
         data = run_algorithm_post(data_input)
         curr_problem_id = data_input['problem_id']
 
@@ -147,9 +159,6 @@ def algorithm():
 
         prblm.problem_time = datetime.timestamp(datetime.now())
         # 对数据库的修改，应该放在最后，保证题目生成成功了再修改
-
-        for item in data:
-            print(item)
 
         if data['answer']==True:
             prblm.status = 1
