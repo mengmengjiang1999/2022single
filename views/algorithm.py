@@ -146,8 +146,8 @@ def algorithm():
                 print(prblm.username)
                 print(prblm.problem_type)
                 print(prblm.problem_time)
-                prblm(prblm.id)
-                prblm(prblm.status)
+                print(prblm.id)
+                print(prblm.status)
                 data = run_algorithm_get(curr_problem_type,data_sha,prblm.status,False)
                 return jsonify(data)
         else:
