@@ -29,3 +29,27 @@ class Problem(db.Model):
  
     def __repr__(self):
         return "id : {self.id}, problem_id: {self.problem_id}, status: {self.status}"
+
+class Course(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    coursename = db.Column(db.String(80), unique=False, nullable=False)
+    username = db.Column(db.String(80), unique=True)
+    status = db.Column(db.Integer, unique=False, nullable=False)
+    # 0:普通用户
+    # 1:管理员
+
+    def __repr__(self):
+        return "id : {self.id}, problem_id: {self.problem_id}, status: {self.status}"
+
+class CourseHomework(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    coursename = db.Column(db.String(80), unique=False, nullable=False)
+    homework = db.Column(db.Integer, unique=False, nullable=True)
+    # 作业的开始时间和结束时间
+    starttime = db.Column(db.Integer, unique=False, nullable=False)
+    endtime = db.Column(db.Integer, unique=False, nullable=False)
+    # 该题目需要完成的次数
+    count = db.Column(db.Integer, unique=False, nullable=False)
+
+    def __repr__(self):
+        return "id : {self.id}, problem_id: {self.problem_id}, status: {self.status}"
