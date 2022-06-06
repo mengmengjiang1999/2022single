@@ -1,3 +1,4 @@
+import email
 from flask import Blueprint
 blueuser=Blueprint('user',__name__)   #蓝图的对象的名称=Blueprint('自定义蓝图名称',__name__) 
 
@@ -43,6 +44,54 @@ def valid_login(username, password):
     else:
         return False
 
+def valid_input_regist(username,password1,password2,email):
+    data = {
+        'status': False,
+        'error': None,
+    }
+    if username is None:
+        data['error']="未输入用户名"
+        return data
+    if password1 is None:
+        data['error']="未输入密码"
+        return data
+    if password2 is None:
+        data['error']="没有确认密码"
+        return data
+    if email is None:
+        data['error']="未输入邮箱"
+        return data
+    if len(password1)<6:
+        data['error']="密码需要至少有6位"
+        return data
+    if password1!=password2:
+        data['error']="两次输入密码不相同"
+        return data
+    # 经过以上验证之后，认为数据合法
+    data['status']=True
+    return data
+
+def valid_input_login(username,password):
+    data = {
+        'status': False,
+        'error': None,
+    }
+    if username is None:
+        data['error']="未输入用户名"
+        return data
+    if password is None:
+        data['error']="未输入密码"
+        return data
+    if len(password)<6:
+        data['error']="密码需要至少有6位"
+        return data
+    if len(password)>16:
+        data['error']="密码不能多于16位"
+        return data
+    # 经过以上验证之后，认为数据合法
+    data['status']=True
+    return data
+
 # 注册检验（用户名、邮箱验证）
 def valid_regist(username, email):
     user = Userinfo.query.filter(or_(Userinfo.username == username, Userinfo.email == email)).first()
@@ -65,20 +114,22 @@ def regist():
     }
     if request.method == 'POST':
         data_input = request.get_json()
-        print("==============================")
-        print(data_input)
-        if data_input['password1'] != data_input['password2']:
-            error = '两次密码不相同！'
-        elif valid_regist(data_input['username'], data_input['email']):
-            print("==============================")
-            print(data_input)
-            user = Userinfo(username=data_input['username'], password=data_input['password1'], email=data_input['email'])
-            db.session.add(user)
-            db.session.commit()
-            data['status']=True
-        else:
-            error = '该用户名或邮箱已被注册！'
-            data['error']=error
+        username = data_input['username']
+        password1=data_input['password1']
+        password2=data_input['password2']
+        email=data_input['email']
+        data = valid_input_regist(username,password1,password2,email)
+        if data['status']:
+            if valid_regist(data_input['username'], data_input['email']):
+                user = Userinfo(username=data_input['username'], password=data_input['password1'], email=data_input['email'])
+                db.session.add(user)
+                db.session.commit()
+                data['status']=True
+            else:
+                error = '该用户名或邮箱已被注册！'
+                data['status']=False
+                data['error']=error
+    print(data)
     return jsonify(data)
 
 
@@ -93,15 +144,20 @@ def login():
         username = data_input['username']
         password = data_input['password']
 
-        if valid_login(username,password):
-            curr_user = User()
-            curr_user.id = username
+        data = valid_input_login(username,password)
 
-            login_user(curr_user)
-            data['status']=True,
-        else:
-            data['error']= "Wrong username or password!"
+        # 验证输入格式是否合法
+        if data['status']:
+            # 在数据库里查找
+            if valid_login(username,password):
+                curr_user = User()
+                curr_user.id = username
+                login_user(curr_user)
+            else:
+                data['status']=False
+                data['error']= "用户名或密码错误"
 
+    print(data)
     return jsonify(data)
 
 @blueuser.route('/login_status', methods=['GET'])
