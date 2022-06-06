@@ -115,6 +115,7 @@ def algorithm():
             prblm = Problem.query.filter(
                 and_(Problem.problem_type==curr_problem_type,
                 Problem.username==current_user.id,Problem.status!=1)).first()
+
             print("algrithm_get-检查是否有未完成题目",prblm)
             if prblm is None:
                 # 新题目的标志
@@ -141,6 +142,12 @@ def algorithm():
                 # 该用户还有未完成的题目
                 data_sha = prblm.problem_id
                 # 取读取数据了
+                print(data_sha)
+                print(prblm.username)
+                print(prblm.problem_type)
+                print(prblm.problem_time)
+                prblm(prblm.id)
+                prblm(prblm.status)
                 data = run_algorithm_get(curr_problem_type,data_sha,False)
                 return jsonify(data)
         else:
