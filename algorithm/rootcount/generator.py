@@ -1,7 +1,4 @@
 import random
-import os
-
-from matplotlib.pyplot import close
 
 '''
 输入：
