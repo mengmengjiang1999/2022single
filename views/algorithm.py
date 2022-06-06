@@ -144,6 +144,7 @@ def algorithm():
 
         prblm = Problem.query.filter(
             Problem.problem_id==curr_problem_id).first()
+
         prblm.problem_time = datetime.timestamp(datetime.now())
         # 对数据库的修改，应该放在最后，保证题目生成成功了再修改
 

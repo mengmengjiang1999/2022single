@@ -7,7 +7,7 @@ from flask import request, jsonify
 from flask_login import login_required, current_user
 from sqlalchemy import and_, false, null, or_, true
 
-from models import Course,CourseHomework
+from models import Course,CourseHomework, Problem
 
 from app import db
 
@@ -149,6 +149,7 @@ def homework_add():
     }
     return jsonify(data)
 
+EMOJIS = ["✅","❌"]
 
 # 同学：展示我所有的作业，以及完成情况
 @bluecourse.route('/course/lookhomework', methods=['POST'])
@@ -163,15 +164,30 @@ def homework_add():
             coursehw = CourseHomework.query.filter(
                 CourseHomework.courseid == courseid
             ).all()
+
             coursehws = []
             for i in range(len(coursehw)):
                 item = coursehw[i]
+                problemrecord = Problem.query.filter(
+                    and_(
+                        Problem.username==current_user.id,
+                        Problem.status==1,
+                        Problem.problem_type==item.homework,
+                        Problem.problem_time<=item.endtime,
+                    )
+                ).all()
+                finish = ""
+                if len(problemrecord)>=item.count:
+                    finish = EMOJIS[0]
+                else:
+                    finish = EMOJIS[1]
                 data2 ={
                     'id': item.id,
                     'starttime': item.starttime, 
                     'endtime': item.endtime,
                     'count': item.count, 
                     'homework': item.homework, 
+                    'finished': finish,
                 }
                 coursehws.append(data2)
             data = {
