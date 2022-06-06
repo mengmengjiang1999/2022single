@@ -43,7 +43,7 @@ class Course(db.Model):
 
 class CourseHomework(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    coursename = db.Column(db.String(80), unique=False, nullable=False)
+    courseid = db.Column(db.Integer, unique=False, nullable=False)
     homework = db.Column(db.Integer, unique=False, nullable=True)
     # 作业的开始时间和结束时间
     starttime = db.Column(db.Integer, unique=False, nullable=False)

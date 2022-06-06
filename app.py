@@ -34,12 +34,14 @@ from views.algorithm import bluealgorithm
 from views.tool import bluetool
 from views.test import bluetest
 from views.problem import blueproblem
+from views.course import bluecourse
 
 app.register_blueprint(blueuser)
 app.register_blueprint(bluealgorithm)
 app.register_blueprint(bluetool)
 app.register_blueprint(bluetest)
 app.register_blueprint(blueproblem)
+app.register_blueprint(bluecourse)
 
 from werkzeug.security import generate_password_hash
 
