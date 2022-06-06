@@ -26,10 +26,10 @@ def get_data_sha():
     data_sha = hashlib.sha256((str(time)+str(salt)).encode('utf-8')).hexdigest() 
     return data_sha 
 
-def run_algorithm_get(type:int,data_sha:str,need_run:bool=False):
+def run_algorithm_get(type:int,data_sha:str,status_now:int,need_run:bool=False):
     from views.run import run
     filepath_in, filepath_ans, filepath_problem, filepath_image = run(type,data_sha,need_run)
-    
+
     # 读文件
     file_problem = open(filepath_problem,"r")
     data_problem = file_problem.read()
@@ -46,7 +46,15 @@ def run_algorithm_get(type:int,data_sha:str,need_run:bool=False):
         'problem_id' : data_sha,
         'data_problem': data_problem,
         'data_image': data_image.decode(),
+        'last_answer': "",
     }
+
+    # 表示还有未完成的题目
+    if status_now==2:
+        filepath_last_ans = './data/record/' + data_sha + '.ans' #上次提交的答案
+        with open(filepath_last_ans,"r") as file_last_ans:
+            last_ans = file_last_ans.read()
+            data['last_answer']=last_ans
 
     return data
 
@@ -91,16 +99,12 @@ def algorithm():
             curr_problem_type = 0
 
             if data_input.get('problem_type') == 'shortestpath':
-                print("shortestpath")
                 curr_problem_type = 0
             elif data_input.get('problem_type') == 'tsp':
-                print("tsp")
                 curr_problem_type = 1
             elif data_input.get('problem_type') == 'spantree':
-                print("spantree")
                 curr_problem_type = 2
             elif data_input.get('problem_type') == 'roottree':
-                print("roottree")
                 curr_problem_type = 3
             else:
                 return jsonify({
@@ -121,7 +125,6 @@ def algorithm():
 
                 print("新题目")
 
-                
 
                 # 对数据库的修改，应该放在最后，保证题目生成成功了再修改
                 prblm = Problem(
@@ -157,14 +160,14 @@ def algorithm():
         prblm = Problem.query.filter(
             Problem.problem_id==curr_problem_id).first()
 
-        prblm.problem_time = datetime.timestamp(datetime.now())
-        # 对数据库的修改，应该放在最后，保证题目生成成功了再修改
-
         if data['answer']==True:
             prblm.status = 1
+            db.session.commit()
         else:
             prblm.status = 2
-        db.session.commit()
+            prblm.problem_time = datetime.timestamp(datetime.now())
+        # 对数据库的修改，应该放在最后，保证题目生成成功了再修改
+            db.session.commit()
 
         return jsonify(data)
 
