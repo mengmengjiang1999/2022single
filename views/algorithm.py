@@ -122,7 +122,7 @@ def algorithm():
                 data_sha = get_data_sha()
 
                 # 得到一份新题目
-                data = run_algorithm_get(curr_problem_type,data_sha,True)
+                data = run_algorithm_get(type=curr_problem_type,data_sha=data_sha,status_now=0,need_run =True)
 
                 print("新题目")
 
@@ -148,12 +148,16 @@ def algorithm():
                 print(prblm.problem_time)
                 prblm(prblm.id)
                 prblm(prblm.status)
-                data = run_algorithm_get(curr_problem_type,data_sha,False)
+                data = run_algorithm_get(curr_problem_type,data_sha,prblm.status,False)
                 return jsonify(data)
         else:
             data_sha = problem_id
             # 那么这就是取读取数据了
-            data = run_algorithm_get(curr_problem_type,data_sha,False)
+            prblm = Problem.query.filter(
+                and_(Problem.problem_id==data_sha,
+                    Problem.username==curr_problem_id.id
+                )).first()
+            data = run_algorithm_get(curr_problem_type,data_sha,prblm.status,False)
             return jsonify(data)
         
     elif request.method == 'POST':
