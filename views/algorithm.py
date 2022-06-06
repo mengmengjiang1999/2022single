@@ -155,7 +155,7 @@ def algorithm():
             # 那么这就是取读取数据了
             prblm = Problem.query.filter(
                 and_(Problem.problem_id==data_sha,
-                    Problem.username==curr_problem_id.id
+                    Problem.username==current_user.id
                 )).first()
             data = run_algorithm_get(curr_problem_type,data_sha,prblm.status,False)
             return jsonify(data)
