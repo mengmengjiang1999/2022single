@@ -18,7 +18,7 @@ import base64
 import os
 import random
 
-from models import Problem
+from models import Problem, Userinfo
 
 def get_data_sha():
     time = datetime.timestamp(datetime.now())
@@ -184,14 +184,20 @@ def algorithm():
         prblm = Problem.query.filter(
             Problem.problem_id==curr_problem_id).first()
 
+        user = Userinfo.query.filter(Userinfo.username==current_user.id).first()
+        user.submitted += 1
+
         if data['answer']==True:
             prblm.status = 1
-            db.session.commit()
+            user.correct += 1
         else:
             prblm.status = 2
             prblm.problem_time = datetime.timestamp(datetime.now())
         # 对数据库的修改，应该放在最后，保证题目生成成功了再修改
-            db.session.commit()
+
+        db.session.commit()
+        print(prblm)
+        print(user)
 
         return jsonify(data)
 

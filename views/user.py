@@ -53,6 +53,8 @@ def valid_input_regist(username,password1,password2,email):
         'status': False,
         'error': None,
     }
+    data['error']="目前未开放注册"
+    return data
     if username is None:
         data['error']="未输入用户名"
         return data

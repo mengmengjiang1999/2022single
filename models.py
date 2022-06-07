@@ -12,9 +12,11 @@ class Userinfo(db.Model):
     username = db.Column(db.String(80), unique=True)
     password = db.Column(db.String(256), unique=False)
     email = db.Column(db.String(120), unique=True)
+    submitted = db.Column(db.Integer)
+    correct = db.Column(db.Integer)
 
     def __repr__(self):
-        return '<User %r>' % self.username
+        return '<User %r, submitted=%d, correct=%d>' % (self.username, self.submitted, self.correct)
 
 class Problem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -28,7 +30,7 @@ class Problem(db.Model):
     # 表示题目创建的时间，或上次提交答案的时间
  
     def __repr__(self):
-        return "id : {self.id}, problem_id: {self.problem_id}, status: {self.status}"
+        return "id : {}, problem_id: {}, status: {}".format(self.id, self.problem_id, self.status)
 
 class Course(db.Model):
     id = db.Column(db.Integer, primary_key=True)
