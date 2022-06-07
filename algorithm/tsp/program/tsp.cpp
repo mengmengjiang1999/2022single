@@ -6,7 +6,7 @@ using namespace std;
 
 const int MAXN = 25;
 
-int N, a[MAXN][MAXN], min_dist, p[MAXN];
+int N, M, a[MAXN][MAXN], min_dist, p[MAXN];
 bool visited[MAXN];
 
 void dfs(int t, int current, int dist)
@@ -33,9 +33,13 @@ void dfs(int t, int current, int dist)
 
 int main()
 {
-    scanf("%d", &N);
-    for (int i = 0; i < N; i++)
-        for (int j = 0; j < N; j++) scanf("%d", &a[i][j]);
+    scanf("%d%d", &N, &M);
+    memset(a, 0x3f, sizeof(a));
+    for (int i = 0, u, v, w; i < M; i++)
+    {
+        scanf("%d%d%d", &u, &v, &w);
+        a[u - 1][v - 1] = w;
+    }
 
     min_dist = 0x7fffffff;
     for (int i = 1; i < N; i++)

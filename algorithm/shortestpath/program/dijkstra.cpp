@@ -128,9 +128,11 @@ int main(){
     int s,t;
     scanf("%d%d",&n,&m);
     scanf("%d%d",&s,&t);
+    s--, t--;
     for(int i=0;i<m;i++){
         int a,b,len;
         scanf("%d%d%d",&a,&b,&len);
+        a--, b--;
         edges[a].insert(b,len);
     }
     //图信息输入完毕

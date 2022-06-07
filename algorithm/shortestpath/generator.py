@@ -14,10 +14,10 @@ M + 1 行。
 输入数据保证w>0。'''
 
 
-N_max=8
+N_max=6
 N_min=5
 W_min=1
-W_max=10
+W_max=20
 
 
 DENSITY = 0.45
@@ -31,25 +31,24 @@ def gen_edges(N):
     # 随机生成边序列
     # edges := list[(int,int,int)]
     edges = []
-    for i in range(N):
-        for j in range(N):
+    for i in range(1, N+1):
+        for j in range(1, N+1):
             if i!=j:
                 rnd = random.random()
                 if rnd < DENSITY:
                     w = random.randint(W_min, W_max)
                     edges.append((i,j,w))
-    S = 0
-    T = N-1
+    S = 1
+    T = N
     return edges, S, T
 
 def gen_data(N, S, T, edges):
-    data = ''
     M = len(edges)
-    data = data + str(N)+' '+str(M)+' '+str(S)+' '+str(T)+'\n'
-    M = len(edges)
+    data = "%d %d %d %d\n" % (N, M, S, T)
     for edge in edges:
-        data = data + str(edge[0])+' '+str(edge[1])+' '+str(edge[2])+'\n'
+        data += "%d %d %d\n" % (edge[0], edge[1], edge[2])
     return data
+
     # with open(filepath_in, "w") as f:
     #     M = len(edges)
     #     # f.write(str(N)+' '+str(M)+' '+str(S)+' '+str(T)+'\n')
@@ -61,9 +60,9 @@ def gen_problem(S,T):
     problem = '''
 ### 求单源最短路
 
-下图中，编号为 '''+str(S)+''' 的结点是起点，编号为 '''+str(T)+''' 是终点。请计算从起点到终点的最短路。\n
+下图中，编号为 %d 的结点是起点，编号为 %d 是终点。请计算从起点到终点的最短路。
 
-答案为一个正整数，如果从起点到终点不存在一条路径，请提交2147483647。
+答案为一个正整数，如果从起点到终点不存在一条路径，请提交 2147483647。
 
-    '''
+    ''' % (S, T)
     return problem

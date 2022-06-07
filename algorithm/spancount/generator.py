@@ -15,12 +15,12 @@ M + 1 行。
 
 
 N_max=5
-N_min=5
+N_min=4
 W_min=1
 W_max=10
 
 
-DENSITY = 0.3
+DENSITY = 0.5
 
 
 # 注意：出题时编号从0开始
@@ -36,23 +36,28 @@ def gen_edges(N):
             if i!=j:
                 rnd = random.random()
                 if rnd < DENSITY:
-                    w = random.randint(W_min, W_max)
-                    edges.append((i,j,w))
-    S = 1
-    T = N
-    return edges, S, T
+                    edges.append((i, j, "<<i>e</i><sub>%d</sub>>" % (len(edges) + 1)))
+    e_exc = random.randint(1, len(edges))
+    e_inc = random.randint(1, len(edges))
+    return edges, e_exc, e_inc
 
-def gen_data(N, S, T, edges):
-    data = ''
+def gen_data(N, e_exc, e_inc, edges):
     M = len(edges)
-    data = data + str(N)+' '+str(M)+'\n'
-    M = len(edges)
+    data = "%d %d %d %d\n" % (N, M, e_exc, e_inc)
     for edge in edges:
-        data = data + str(edge[0])+' '+str(edge[1])+' '+str(edge[2])+'\n'
+        data += "%d %d\n" % (edge[0], edge[1])
     return data
 
-def gen_problem(S,T):
+def gen_problem(e_exc, e_inc):
     problem = '''
-对于下图给出的一个边上不带权的有向连通图G，计算该图所有的支撑树的数目。
-    '''
+### 支撑树计数
+
+对于下图给出的一个边上不带权的有向连通图 $G$，计算该图中：
+
+1. 支撑树的数目。
+2. 不含边 $e_%d$ 的支撑树的数目。
+3. 必含边 $e_%d$ 的支撑树的数目。
+
+三个答案之间用一个空格隔开。
+    ''' % (e_exc, e_inc)
     return problem

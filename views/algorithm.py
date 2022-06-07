@@ -62,7 +62,7 @@ def run_algorithm_post(data_input:str):
     filepath_ans = './data/answer/' + data_input['problem_id'] + '.ans' #答案地址
 
     file_ans = open(filepath_ans,"r")
-    data_ans = file_ans.read()
+    data_ans = file_ans.read().strip()
     file_ans.close()
 
     last_answer = None
@@ -78,7 +78,7 @@ def run_algorithm_post(data_input:str):
 
     print("run_algorithm_post data_ans",data_ans)
     data = {
-        'answer': data_ans==data_input['answer'],
+        'answer': data_ans==data_input['answer'].strip(),
         'last_answer': last_answer,
     }
 

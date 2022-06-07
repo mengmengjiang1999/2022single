@@ -90,5 +90,5 @@ int main()
         }
     int ans_inc = span_count(N - 1, M - 1, edges_include);
     
-    printf("%d\n%d\n%d\n", ans_all, ans_exc, ans_inc);
+    printf("%d %d %d\n", ans_all, ans_exc, ans_inc);
 }

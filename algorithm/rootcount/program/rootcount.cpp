@@ -95,5 +95,5 @@ int main()
         }
     int ans_inc = root_count(N, m, R, edges_include);
     
-    printf("%d\n%d\n%d\n", ans_all, ans_exc, ans_inc);
+    printf("%d %d %d\n", ans_all, ans_exc, ans_inc);
 }

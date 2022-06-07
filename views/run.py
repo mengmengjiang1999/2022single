@@ -40,16 +40,6 @@ def del_files():
     os.system('rm '+FILEPATH_EXE_TSP)
     pass
 
-def generate_dot(picname, edges):
-    s = "digraph "+picname+" {\n"
-    for edge in edges:
-        s = s + str(edge[0])+"->"+str(edge[1])+"[label=\""+str(edge[2])+"\"]"+"\n"
-    s = s + "}\n"
-    return s
-
-def generate_png(dotfilename,pngfilename):
-    os.system('dot -Tpng ' + dotfilename + ' -o ' + pngfilename)
-
 # 无论数据类型是什么，都要返回边列表的形式
 # 接口约定
 def gen_edges():
@@ -65,7 +55,7 @@ def gen_input_files(type:int):
         data = gen_data(N, S, T, edges)
         problem = gen_problem(S, T)
 
-        return edges,data,problem
+        return N,edges,data,problem
     elif type==1:
         from algorithm.tsp.generator import N_min, N_max, gen_edges, gen_data, gen_problem
 
@@ -75,29 +65,30 @@ def gen_input_files(type:int):
         data = gen_data(N, S, T, edges)
         problem = gen_problem(S, T)
 
-        return edges,data,problem
+        return N,edges,data,problem
 
     elif type==2:
         from algorithm.spancount.generator import N_min, N_max, gen_edges, gen_data, gen_problem
 
         # 生成数据并写入，运算，给出答案
         N = random.randint(N_min,N_max)
-        edges, S, T = gen_edges(N)
-        data = gen_data(N, S, T, edges)
-        problem = gen_problem(S, T)
+        edges, e_exc, e_inc = gen_edges(N)
+        data = gen_data(N, e_exc, e_inc, edges)
+        problem = gen_problem(e_exc, e_inc)
 
-        return edges,data,problem
+        return N,edges,data,problem
 
     elif type==3:
         from algorithm.rootcount.generator import N_min, N_max, gen_edges, gen_data, gen_problem
 
         # 生成数据并写入，运算，给出答案
         N = random.randint(N_min,N_max)
-        edges, S, T = gen_edges(N)
-        data = gen_data(N, S, T, edges)
-        problem = gen_problem(S, T)
+        R = random.randint(1, N)
+        edges, e_exc, e_inc = gen_edges(N)
+        data = gen_data(N, R, e_exc, e_inc, edges)
+        problem = gen_problem(R, e_exc, e_inc)
 
-        return edges,data,problem
+        return N,edges,data,problem
     else:
         pass
 
@@ -120,7 +111,7 @@ def run(problem_type:int,problem_sha:str,need_run:bool=False):
     
     # 如果需要真的生成新的题目，再生成
     # 这里是生成新数据的地方
-    edges,data,problem = gen_input_files(problem_type)
+    N,edges,data,problem = gen_input_files(problem_type)
 
     with open(filepath_in,"w") as file_in:
         file_in.write(data)
@@ -128,14 +119,14 @@ def run(problem_type:int,problem_sha:str,need_run:bool=False):
     os.system(FILEPATH_EXE[problem_type] +' < '+filepath_in+' > '+filepath_ans)
 
     with open(filepath_ans,"r") as file_ans:
-        ans = file_ans.read()
+        ans = file_ans.read().strip()
         print("新生成的题目答案是",ans)
 
     # 根据随机生成的结果来生成图片
     from dots.dots import generate_dot, generate_png
     filepath_dot = filepath_pre_dot + problem_sha + '.dot'
     with open(filepath_dot,"w") as file_dot:
-        file_dot.write(generate_dot("pic",edges,problem_type))
+        file_dot.write(generate_dot("pic",N,edges,problem_type))
     generate_png(filepath_dot, filepath_image)
 
     print("filepath-problem",filepath_problem)
