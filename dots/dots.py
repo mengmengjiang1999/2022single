@@ -3,6 +3,7 @@ import os
 
 def generate_dot(picname, n, edges, type):
     s = "digraph %s {\n" % picname
+    s += "edge [fontsize=11];\n"
     s += "layout=sfdp;\n"
     for i in range(1, n + 1):
         s += "%d;\n" % i
@@ -11,7 +12,7 @@ def generate_dot(picname, n, edges, type):
     s += "}\n"
     return s
 
-def generate_png(dotfilename,pngfilename):
-    print("generate_png")
-    os.system('dot -Tpng ' + dotfilename + ' -o ' + pngfilename)
-    print("generate_png")
+def generate_figure(dotfilename,filename):
+    print("generate_figure")
+    os.system('dot -Gdpi=72 -Tpng ' + dotfilename + ' -o ' + filename)
+    print("generate_figure")

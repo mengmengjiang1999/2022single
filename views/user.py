@@ -22,6 +22,10 @@ login_manager.init_app(app)
 class User(UserMixin):
     pass
 
+@login_manager.unauthorized_handler
+def unauth_handler():
+    return "Access denied.", 401
+
 @login_manager.user_loader
 def load_user(username):
     if query_user(username) is not None:

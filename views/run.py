@@ -92,13 +92,16 @@ def gen_input_files(type:int):
     else:
         pass
 
+def get_filepath_image(problem_sha):
+    return filepath_pre_image + problem_sha + '.png' #图片地址
+
 def run(problem_type:int,problem_sha:str,need_run:bool=False):
     # 对于所有题目的通用流程
     filepath_in = filepath_pre_in +  problem_sha + '.in' #输入数据地址
     filepath_ans = filepath_pre_answer + problem_sha + '.ans' #答案地址
     filepath_problem = filepath_pre_problem + problem_sha + '.md' #题面地址
     filepath_problem_html = filepath_pre_html + problem_sha + '.html' #题面地址
-    filepath_image = filepath_pre_image + problem_sha + '.png' #图片地址
+    filepath_image = get_filepath_image(problem_sha)
 
     print("run函数")
 
@@ -123,11 +126,11 @@ def run(problem_type:int,problem_sha:str,need_run:bool=False):
         print("新生成的题目答案是",ans)
 
     # 根据随机生成的结果来生成图片
-    from dots.dots import generate_dot, generate_png
+    from dots.dots import generate_dot, generate_figure
     filepath_dot = filepath_pre_dot + problem_sha + '.dot'
     with open(filepath_dot,"w") as file_dot:
         file_dot.write(generate_dot("pic",N,edges,problem_type))
-    generate_png(filepath_dot, filepath_image)
+    generate_figure(filepath_dot, filepath_image)
 
     print("filepath-problem",filepath_problem)
     print("filepath-image",filepath_image)

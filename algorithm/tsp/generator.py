@@ -18,7 +18,7 @@ M + 1 行。
 '''
 
 N_max=5
-N_min=4
+N_min=5
 W_min=1
 W_max=20
 

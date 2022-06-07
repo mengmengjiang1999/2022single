@@ -36,24 +36,23 @@ def run_algorithm_get(type:int,data_sha:str,status_now:int,need_run:bool=False):
     file_problem.close()
 
     # 读取图片
-    file_image = open(filepath_image, "rb")
-    data_image = file_image.read()
-    data_image = base64.b64encode(data_image)
-    file_image.close()
+    # file_image = open(filepath_image, "rb")
+    # data_image = file_image.read()
+    # data_image = base64.b64encode(data_image)
+    # file_image.close()
 
     # 返回题目
     data = {
         'problem_id' : data_sha,
         'data_problem': data_problem,
-        'data_image': data_image.decode(),
-        'last_answer': "",
+        'data_image': "/api/algorithm_fig?problem_id=%s" % data_sha,
     }
 
     # 表示还有未完成的题目
     if status_now==2:
         filepath_last_ans = './data/record/' + data_sha + '.ans' #上次提交的答案
         with open(filepath_last_ans,"r") as file_last_ans:
-            last_ans = file_last_ans.read()
+            last_ans = file_last_ans.read().strip()
             data['last_answer']=last_ans
 
     return data
@@ -65,7 +64,7 @@ def run_algorithm_post(data_input:str):
     data_ans = file_ans.read().strip()
     file_ans.close()
 
-    last_answer = None
+    last_answer = data_input['answer'].strip()
 
     filepath_last_ans = './data/record/' + data_input['problem_id'] + '.ans' #上次提交的答案
     # with open(filepath_last_ans,"r") as file_last:
@@ -74,16 +73,30 @@ def run_algorithm_post(data_input:str):
 
     with open(filepath_last_ans,"w") as file_last:
         file_last.write(str(last_answer))
-        file_last.close()
 
     print("run_algorithm_post data_ans",data_ans)
     data = {
-        'answer': data_ans==data_input['answer'].strip(),
+        'answer': data_ans==last_answer,
         'last_answer': last_answer,
     }
 
     print("run_algorithm_post",data)
     return data
+
+@bluealgorithm.route('/algorithm_fig', methods = ['GET'])
+@login_required
+def algorithm_fig():
+    if request.method == 'GET':
+        data_input = request.args
+        problem_id = data_input.get('problem_id')
+        if problem_id:
+            from views.run import get_filepath_image
+            fname = get_filepath_image(problem_id)
+            if os.path.exists(fname):
+                with open(fname, "rb") as f:
+                    data_image = f.read()
+                    return data_image
+    return ""
 
 @bluealgorithm.route('/algorithm', methods = ['GET', 'POST'])
 @login_required
@@ -142,12 +155,12 @@ def algorithm():
                 # 该用户还有未完成的题目
                 data_sha = prblm.problem_id
                 # 取读取数据了
-                print(data_sha)
-                print(prblm.username)
-                print(prblm.problem_type)
-                print(prblm.problem_time)
-                print(prblm.id)
-                print(prblm.status)
+                # print(data_sha)
+                # print(prblm.username)
+                # print(prblm.problem_type)
+                # print(prblm.problem_time)
+                # print(prblm.id)
+                # print(prblm.status)
                 data = run_algorithm_get(curr_problem_type,data_sha,prblm.status,False)
                 return jsonify(data)
         else:
