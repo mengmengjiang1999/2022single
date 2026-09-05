@@ -72,3 +72,7 @@ git status
 pip install -r requirements-dev.txt
 pytest -q
 ```
+
+## 示例数据库
+
+仓库提供不含真实用户信息的脱敏样例数据库，使用方法见 [`sample/README.md`](sample/README.md)。原始数据库可能包含敏感账号数据，不应提交到 Git。
