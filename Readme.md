@@ -1,4 +1,4 @@
-# 2022single
+# 2022 Algorithm Learning Platform
 
 一个基于 Flask 的单机在线评测（OJ）后端，包含用户、课程、题目、算法生成器和测试相关接口。
 

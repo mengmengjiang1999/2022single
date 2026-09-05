@@ -1,4 +1,7 @@
 {
+  "name": "2022-algorithm-learning-platform",
+  "version": "1.0.0",
+  "private": true,
   "dependencies": {
     "element-plus": "^2.1.5",
     "lodash.uniqueid": "^4.0.1"
