@@ -1,5 +1,5 @@
 
-import os
+import subprocess
 
 def generate_dot(picname, n, edges, type):
     s = "digraph %s {\n" % picname
@@ -14,5 +14,8 @@ def generate_dot(picname, n, edges, type):
 
 def generate_figure(dotfilename,filename):
     print("generate_figure")
-    os.system('dot -Gdpi=72 -Tpng ' + dotfilename + ' -o ' + filename)
+    subprocess.run(
+        ['dot', '-Gdpi=72', '-Tpng', dotfilename, '-o', filename],
+        check=True,
+    )
     print("generate_figure")

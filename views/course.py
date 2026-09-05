@@ -201,6 +201,7 @@ def homework_look():
                         Problem.username==current_user.id,
                         Problem.status==1,
                         Problem.problem_type==item.homework,
+                        Problem.problem_time>=item.starttime,
                         Problem.problem_time<=item.endtime,
                     )
                 ).all()

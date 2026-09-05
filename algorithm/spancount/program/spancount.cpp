@@ -8,41 +8,43 @@ const int MAXN = 10;
 const int MAXM = 20;
 
 int N, M, e_exc, e_inc;
-int edges[MAXN][2], edges_exclude[MAXN][2], edges_include[MAXN][2];
+int edges[MAXM][2], edges_exclude[MAXM][2], edges_include[MAXM][2];
 
-int det(int n, double a[][MAXN])
+long long det(int n, long long a[][MAXN])
 {
-    double ans = 1;
-    for (int i = 0; i < n; i++)
+    if (n == 0) return 1;
+    long long sign = 1, previous_pivot = 1;
+    for (int i = 0; i < n - 1; i++)
     {
-        if (a[i][i] == 0) ans *= -1;
-        for (int j = i; j < n; j++)
-            if (a[j][i] != 0)
-            {
-	            for (int k = 0; k < n; k++) swap(a[i][k], a[j][k]);
-                break;
-            }
-        if (a[i][i] == 0) return 0;
-        for (int j = i + 1; j < n; j++)
-            if (a[j][i] != 0)
-            {
-                double x = a[j][i] / a[i][i];
-                for (int k = i; k < n; k++) a[j][k] -= a[i][k] * x;
-            }
+        int pivot = i;
+        while (pivot < n && a[pivot][i] == 0) pivot++;
+        if (pivot == n) return 0;
+        if (pivot != i)
+        {
+            for (int j = 0; j < n; j++) swap(a[i][j], a[pivot][j]);
+            sign = -sign;
+        }
+        for (int row = i + 1; row < n; row++)
+            for (int col = i + 1; col < n; col++)
+                a[row][col] = (a[row][col] * a[i][i] -
+                               a[row][i] * a[i][col]) / previous_pivot;
+        previous_pivot = a[i][i];
     }
-    for (int i = 0; i < n; i++) ans *= a[i][i];
-    return (int)ans;
+    return sign * a[n - 1][n - 1];
 }
 
-int span_count(int n, int m, int edges[][2])
+long long span_count(int n, int m, int edges[][2])
 {
-    double a[MAXN][MAXN];
+    long long a[MAXN][MAXN];
     for (int i = 0; i < n - 1; i++)
         for (int j = 0; j < n - 1; j++)
         {
             int s = 0;
             for (int k = 0; k < m; k ++)
             {
+                // Contracting the required edge can turn parallel edges into
+                // self-loops. Self-loops never belong to a spanning tree.
+                if (edges[k][0] == edges[k][1]) continue;
                 int x = 0, y = 0;
                 if (i == edges[k][0]) x = 1;
                 else if (i == edges[k][1]) x = -1;
@@ -65,7 +67,7 @@ int main()
         edges[i][0]--, edges[i][1]--;
     }
     
-    int ans_all = span_count(N, M, edges);
+    long long ans_all = span_count(N, M, edges);
 
     for (int i = 0, t = 0; i < M; i++)
         if (i != e_exc)
@@ -74,7 +76,7 @@ int main()
             edges_exclude[t][1] = edges[i][1];
             t++;
         }
-    int ans_exc = span_count(N, M - 1, edges_exclude);
+    long long ans_exc = span_count(N, M - 1, edges_exclude);
 
     int map[MAXN];
     memset(map, -1, sizeof(map));
@@ -88,7 +90,7 @@ int main()
             edges_include[t][1] = map[edges[i][1]];
             t++;
         }
-    int ans_inc = span_count(N - 1, M - 1, edges_include);
+    long long ans_inc = span_count(N - 1, M - 1, edges_include);
     
-    printf("%d %d %d\n", ans_all, ans_exc, ans_inc);
+    printf("%lld %lld %lld\n", ans_all, ans_exc, ans_inc);
 }

@@ -1,3 +1,5 @@
+from views.algorithm import run_algorithm_get
+
 from models import Course, CourseHomework, Problem, Userinfo, db
 
 from .conftest import login
@@ -106,3 +108,86 @@ def test_algorithm_rejects_invalid_or_unowned_problem_ids(client):
 
     assert invalid.status_code == 400
     assert missing.status_code == 404
+
+
+def test_algorithm_rejects_non_string_answer(client):
+    login(client, "student", "student-pass")
+
+    response = client.post(
+        "/algorithm",
+        json={"problem_id": "c" * 64, "answer": 123},
+    )
+
+    assert response.status_code == 400
+
+
+def test_algorithm_result_uses_registered_image_route(app, monkeypatch, tmp_path):
+    problem_html = tmp_path / "problem.html"
+    problem_html.write_text("problem", encoding="utf-8")
+    monkeypatch.setattr(
+        "views.run.run",
+        lambda *args, **kwargs: (
+            str(tmp_path / "input"),
+            str(tmp_path / "answer"),
+            str(problem_html),
+            str(tmp_path / "image"),
+        ),
+    )
+    monkeypatch.chdir(tmp_path)
+
+    with app.test_request_context():
+        result = run_algorithm_get(0, "a" * 64, status_now=2)
+
+    assert result["data_image"] == "/algorithm_fig?problem_id=" + "a" * 64
+    assert "last_answer" not in result
+
+
+def test_homework_only_counts_problems_inside_time_window(app, client):
+    with app.app_context():
+        teacher_course = Course(
+            coursename="Algorithms", username="teacher", status=1
+        )
+        student_membership = Course(
+            coursename="Algorithms", username="student", status=0
+        )
+        db.session.add_all([teacher_course, student_membership])
+        db.session.flush()
+        db.session.add(
+            CourseHomework(
+                courseid=teacher_course.id,
+                homework=0,
+                starttime=10,
+                endtime=20,
+                count=1,
+            )
+        )
+        db.session.add(
+            Problem(
+                username="student",
+                problem_id="d" * 64,
+                problem_type=0,
+                status=1,
+                problem_time=9,
+            )
+        )
+        db.session.commit()
+        course_id = teacher_course.id
+
+    login(client, "student", "student-pass")
+    before = client.post("/course/lookhomework", json={"courseid": course_id})
+    assert before.get_json()["homework"][0]["finished"] == "❌"
+
+    with app.app_context():
+        db.session.add(
+            Problem(
+                username="student",
+                problem_id="e" * 64,
+                problem_type=0,
+                status=1,
+                problem_time=15,
+            )
+        )
+        db.session.commit()
+
+    inside = client.post("/course/lookhomework", json={"courseid": course_id})
+    assert inside.get_json()["homework"][0]["finished"] == "✅"

@@ -8,36 +8,35 @@ const int MAXN = 10;
 const int MAXM = 20;
 
 int N, M, R, e_exc, e_inc;
-int edges[MAXN][2], edges_exclude[MAXN][2], edges_include[MAXN][2];
+int edges[MAXM][2], edges_exclude[MAXM][2], edges_include[MAXM][2];
 
-int det(int n, double a[][MAXN])
+long long det(int n, long long a[][MAXN])
 {
-    double ans = 1;
-    for (int i = 0; i < n; i++)
+    if (n == 0) return 1;
+    long long sign = 1, previous_pivot = 1;
+    for (int i = 0; i < n - 1; i++)
     {
-        if (a[i][i] == 0) ans *= -1;
-        for (int j = i; j < n; j++)
-            if (a[j][i] != 0)
-            {
-	            for (int k = 0; k < n; k++) swap(a[i][k], a[j][k]);
-                break;
-            }
-        if (a[i][i] == 0) return 0;
-        for (int j = i + 1; j < n; j++)
-            if (a[j][i] != 0)
-            {
-                double x = a[j][i] / a[i][i];
-                for (int k = i; k < n; k++) a[j][k] -= a[i][k] * x;
-            }
+        int pivot = i;
+        while (pivot < n && a[pivot][i] == 0) pivot++;
+        if (pivot == n) return 0;
+        if (pivot != i)
+        {
+            for (int j = 0; j < n; j++) swap(a[i][j], a[pivot][j]);
+            sign = -sign;
+        }
+        for (int row = i + 1; row < n; row++)
+            for (int col = i + 1; col < n; col++)
+                a[row][col] = (a[row][col] * a[i][i] -
+                               a[row][i] * a[i][col]) / previous_pivot;
+        previous_pivot = a[i][i];
     }
-    for (int i = 0; i < n; i++) ans *= a[i][i];
-    return (int)(ans + 0.5);
+    return sign * a[n - 1][n - 1];
 }
 
-int root_count(int n, int m, int r, int edges[][2])
+long long root_count(int n, int m, int r, int edges[][2])
 {
     int t = 0;
-    double a[MAXN][MAXN];
+    long long a[MAXN][MAXN];
     int p[MAXN];
     for (int i = 0; i < n; i++)
         if (i != r) p[t++] = i;
@@ -69,7 +68,7 @@ int main()
         edges[i][0]--, edges[i][1]--;
     }
     
-    int ans_all = root_count(N, M, R, edges);
+    long long ans_all = root_count(N, M, R, edges);
 
     for (int i = 0, t = 0; i < M; i++)
         if (i != e_exc)
@@ -78,22 +77,22 @@ int main()
             edges_exclude[t][1] = edges[i][1];
             t++;
         }
-    int ans_exc = root_count(N, M - 1, R, edges_exclude);
+    long long ans_exc = root_count(N, M - 1, R, edges_exclude);
 
-    // int map[MAXN];
-    // memset(map, -1, sizeof(map));
-    // map[edges[e_inc][0]] = map[edges[e_inc][1]] = 0;
-    // for (int i = 0, t = 1; i < N; i++)
-    //     if (map[i] < 0) map[i] = t++;
-    int m = 0;
-    for (int i = 0; i < M; i++)
-        if (i == e_inc || edges[i][1] != edges[e_inc][1])
-        {
-            edges_include[m][0] = edges[i][0];
-            edges_include[m][1] = edges[i][1];
-            m++;
-        }
-    int ans_inc = root_count(N, m, R, edges_include);
+    long long ans_inc = 0;
+    // The root of an outward arborescence has no incoming edge.
+    if (edges[e_inc][1] != R)
+    {
+        int m = 0;
+        for (int i = 0; i < M; i++)
+            if (i == e_inc || edges[i][1] != edges[e_inc][1])
+            {
+                edges_include[m][0] = edges[i][0];
+                edges_include[m][1] = edges[i][1];
+                m++;
+            }
+        ans_inc = root_count(N, m, R, edges_include);
+    }
     
-    printf("%d %d %d\n", ans_all, ans_exc, ans_inc);
+    printf("%lld %lld %lld\n", ans_all, ans_exc, ans_inc);
 }

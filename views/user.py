@@ -113,10 +113,6 @@ def valid_regist(username, email):
     else:
         return True
 
-@blueuser.route('/bluetest')
-def bluetest():
-    return 'bluetest'
-
 # 4.注册
 @blueuser.route('/regist', methods=['GET','POST'])
 def regist():

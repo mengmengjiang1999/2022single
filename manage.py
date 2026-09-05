@@ -7,6 +7,4 @@ if __name__ == '__main__':
 
     pre_compile()
 
-    app.run(debug=True)
-
-    # app.run()
+    app.run()

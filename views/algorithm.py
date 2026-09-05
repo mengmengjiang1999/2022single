@@ -1,4 +1,4 @@
-from flask import Blueprint, send_file
+from flask import Blueprint, send_file, url_for
 
 from views.problem import ALGORITHM_TYPE
 bluealgorithm=Blueprint('algorithm',__name__)   #蓝图的对象的名称=Blueprint('自定义蓝图名称',__name__) 
@@ -50,15 +50,16 @@ def run_algorithm_get(type:int,data_sha:str,status_now:int,need_run:bool=False):
     data = {
         'problem_id' : data_sha,
         'data_problem': data_problem,
-        'data_image': "/api/algorithm_fig?problem_id=%s" % data_sha,
+        'data_image': url_for('algorithm.algorithm_fig', problem_id=data_sha),
     }
 
     # 表示还有未完成的题目
     if status_now==2:
         filepath_last_ans = './data/record/' + data_sha + '.ans' #上次提交的答案
-        with open(filepath_last_ans,"r") as file_last_ans:
-            last_ans = file_last_ans.read().strip()
-            data['last_answer']=last_ans
+        if os.path.exists(filepath_last_ans):
+            with open(filepath_last_ans,"r") as file_last_ans:
+                last_ans = file_last_ans.read().strip()
+                data['last_answer']=last_ans
 
     return data
 
@@ -190,7 +191,10 @@ def algorithm():
         data_input = request.get_json(silent=True) or {}
         print("algrithm_POST",request.get_json())
         curr_problem_id = data_input.get('problem_id')
-        if not is_valid_problem_id(curr_problem_id) or 'answer' not in data_input:
+        if (
+            not is_valid_problem_id(curr_problem_id)
+            or not isinstance(data_input.get('answer'), str)
+        ):
             return jsonify({'status': False, 'error': '提交参数无效'}), 400
 
         print("curr_problem_id",curr_problem_id)
@@ -252,7 +256,7 @@ def problemlist():
             },
             {
                 'id':'P1003',
-                'problem_name': '根数计数',
+                'problem_name': '根树计数',
                 'problem_type': 'roottree',
                 'algorithm': 'rootcnt',
             },

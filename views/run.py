@@ -85,12 +85,15 @@ def gen_input_files(type:int):
 
         return N,edges,data,problem
     else:
-        pass
+        raise ValueError('unsupported problem type')
 
 def get_filepath_image(problem_sha):
     return filepath_pre_image + problem_sha + '.png' #图片地址
 
 def run(problem_type:int,problem_sha:str,need_run:bool=False):
+    if problem_type not in range(len(FILEPATH_EXE)):
+        raise ValueError('unsupported problem type')
+
     # 对于所有题目的通用流程
     filepath_in = filepath_pre_in +  problem_sha + '.in' #输入数据地址
     filepath_ans = filepath_pre_answer + problem_sha + '.ans' #答案地址

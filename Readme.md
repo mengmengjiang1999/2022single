@@ -146,7 +146,7 @@ pip install -r requirements-dev.txt
 pytest -q
 ```
 
-测试覆盖登录保护、旧密码升级、课程创建、作业创建、题型推荐和题目访问校验。C++ 程序可以额外执行语法检查：
+测试覆盖登录保护、旧密码升级、课程与作业、题型推荐、题目访问校验，以及支撑树和根树参考程序的精确计数回归。C++ 程序可以额外执行语法检查：
 
 ```bash
 for source in algorithm/*/program/*.cpp; do
