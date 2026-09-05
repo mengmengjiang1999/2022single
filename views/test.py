@@ -1,5 +1,6 @@
-import os
-from flask import Blueprint
+from pathlib import Path
+
+from flask import Blueprint, current_app
 bluetest=Blueprint('test',__name__)   #蓝图的对象的名称=Blueprint('自定义蓝图名称',__name__) 
 
 @bluetest.route('/bluetest')
@@ -16,17 +17,11 @@ def timenow():
 
 @bluetest.route("/access", methods=['GET'])
 def accesss_count():
-    with open("access_count.txt", "r+") as f:
-        count = f.read()
-        if not count:
-            count = 1
-        else:
-            count = int(count) + 1
-        print("Access count:", count)
-        f.seek(0)
-        f.write(str(count))
+    count_file = Path(current_app.instance_path) / 'access_count.txt'
+    count_file.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        count = int(count_file.read_text()) + 1
+    except (FileNotFoundError, ValueError):
+        count = 1
+    count_file.write_text(str(count))
     return str(count)
-
-if not os.path.exists("access_count.txt"):
-    with open("access_count.txt", "w") as f:
-        f.write("0")

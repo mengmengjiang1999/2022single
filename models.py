@@ -1,5 +1,3 @@
-from flask import Flask
-
 from flask_sqlalchemy import SQLAlchemy
 
 # from flask_sqlalchemy import SQLAlchemy  # 导入扩展类
@@ -12,8 +10,8 @@ class Userinfo(db.Model):
     username = db.Column(db.String(80), unique=True)
     password = db.Column(db.String(256), unique=False)
     email = db.Column(db.String(120), unique=True)
-    submitted = db.Column(db.Integer)
-    correct = db.Column(db.Integer)
+    submitted = db.Column(db.Integer, nullable=False, default=0)
+    correct = db.Column(db.Integer, nullable=False, default=0)
 
     def __repr__(self):
         return '<User %r, submitted=%d, correct=%d>' % (self.username, self.submitted, self.correct)
@@ -26,22 +24,29 @@ class Problem(db.Model):
     problem_type = db.Column(db.Integer, unique=False, nullable=False)
     status = db.Column(db.Integer, unique=False, nullable=False)
     # status: 0:还未做，1:做了答案正确，2：做了，答案错误
-    problem_time = db.Column(db.Integer, unique=False, nullable=False)
+    problem_time = db.Column(db.Float, unique=False, nullable=False)
     # 表示题目创建的时间，或上次提交答案的时间
  
     def __repr__(self):
         return "id : {}, problem_id: {}, status: {}".format(self.id, self.problem_id, self.status)
 
 class Course(db.Model):
+    __table_args__ = (
+        db.UniqueConstraint("coursename", "username", name="uq_course_member"),
+    )
+
     id = db.Column(db.Integer, primary_key=True)
     coursename = db.Column(db.String(80), unique=False, nullable=False)
-    username = db.Column(db.String(80), unique=True)
+    username = db.Column(db.String(80), nullable=False)
     status = db.Column(db.Integer, unique=False, nullable=False)
     # 0:普通用户
     # 1:管理员
 
     def __repr__(self):
-        return "id : {self.id}, problem_id: {self.problem_id}, status: {self.status}"
+        return (
+            f"<Course id={self.id}, name={self.coursename!r}, "
+            f"username={self.username!r}, status={self.status}>"
+        )
 
 class CourseHomework(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -54,4 +59,7 @@ class CourseHomework(db.Model):
     count = db.Column(db.Integer, unique=False, nullable=False)
 
     def __repr__(self):
-        return "id : {self.id}, problem_id: {self.problem_id}, status: {self.status}"
+        return (
+            f"<CourseHomework id={self.id}, courseid={self.courseid}, "
+            f"homework={self.homework}>"
+        )

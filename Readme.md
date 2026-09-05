@@ -7,6 +7,7 @@
 - Python 3.9（项目中的部分依赖版本较旧，建议使用与原项目一致的 Python 版本）
 - C++ 编译器（用于预编译 `algorithm/` 下的示例程序）
 - Node.js/npm（仅在需要前端依赖时使用）
+- Graphviz 与 Pandoc（生成题目图片和 HTML 时使用）
 
 ## 本地运行
 
@@ -14,20 +15,26 @@
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+export SECRET_KEY='请替换为随机字符串'
 python manage.py
 ```
 
 应用默认使用仓库根目录下的本地 SQLite 数据库 `site.db`。首次运行前可初始化数据库：
 
 ```bash
-flask --app app init-db
+FLASK_APP=app flask init-db
 ```
 
 如需删除已有表并重新创建（会清空本地数据）：
 
 ```bash
-flask --app app init-db --drop
+FLASK_APP=app flask init-db --drop
 ```
+
+可通过环境变量覆盖运行配置：
+
+- `SECRET_KEY`：会话签名密钥，部署时必须设置
+- `DATABASE_URL`：SQLAlchemy 数据库连接地址，默认使用 SQLite
 
 ## 前端依赖
 
@@ -58,3 +65,10 @@ git status
 ```
 
 接口说明见 [API.md](API.md)。各算法目录下的 `Readme.md` 包含对应生成器说明。
+
+## 测试
+
+```bash
+pip install -r requirements-dev.txt
+pytest -q
+```

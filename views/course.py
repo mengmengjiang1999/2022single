@@ -1,37 +1,39 @@
-import json
 from flask import Blueprint
 bluecourse=Blueprint('course',__name__)   #蓝图的对象的名称=Blueprint('自定义蓝图名称',__name__) 
 
 from flask import request, jsonify
 from flask_login import login_required, current_user
-from sqlalchemy import and_, false, null, or_, true
+from sqlalchemy import and_
 
 from models import Course,CourseHomework, Problem
 
-from app import db
+from models import db
 
 @bluecourse.route('/course/create', methods=['POST'])
 @login_required
 def course_create():
-    data_input = request.get_json()
-    coursename = data_input['coursename']
-    course1 = Course.query.filter(
+    data_input = request.get_json(silent=True) or {}
+    coursename = str(data_input.get('coursename', '')).strip()
+    if not coursename:
+        return jsonify({'status': False, 'error': '课程名称不能为空'}), 400
+
+    existing_course = Course.query.filter(
         and_(
             Course.username==current_user.id, 
-            Course.status == 0,
+            Course.status == 1,
             Course.coursename == coursename
         )
-    ).all()
-    if not course1 is None:
+    ).first()
+    if existing_course is not None:
         data = {
             'status': False,
             'error': "不能创建重名课程",
         }
-        return jsonify(data)
+        return jsonify(data), 409
     else:
         course = Course(
             username=current_user.id, 
-            status = 0,
+            status = 1,
             coursename = coursename
         )
         db.session.add(course)
@@ -45,16 +47,19 @@ def course_create():
 @bluecourse.route('/course/remove', methods=['POST'])
 @login_required
 def course_remove():
-    data_input = request.get_json()
-    coursename = data_input['coursename']
+    data_input = request.get_json(silent=True) or {}
+    coursename = str(data_input.get('coursename', '')).strip()
     course = Course.query.filter(and_(Course.username==current_user.id, 
-        Course.status == 0,
+        Course.status == 1,
         Course.coursename == coursename)
     ).first()
-    db.session.remove(course)
+    if course is None:
+        return jsonify({'status': False, 'error': '课程不存在或没有删除权限'}), 404
+
+    db.session.delete(course)
     db.session.commit()
     data = {
-        'status': False,
+        'status': True,
         'error': None
     }
     return jsonify(data)
@@ -93,23 +98,25 @@ def course_mycourse():
 @login_required
 def course_mystudent():
     username = current_user.id
-    data_input = request.get_json()
-    coursename = data_input['coursename']
+    data_input = request.get_json(silent=True) or {}
+    coursename = str(data_input.get('coursename', '')).strip()
+    if not coursename:
+        return jsonify({'status': False, 'error': '课程名称不能为空'}), 400
     # 先查看此人是否为管理员
     is_admin = Course.query.filter(and_(
         Course.username == username,
-        Course.status==0,
+        Course.status==1,
         Course.coursename==coursename,
         )).first()
 
-    if not is_admin is None:
+    if is_admin is None:
         data = {
             'status':False,
             'error':"没有权限查看",
         }
         return jsonify(data)
     else:
-        my_student = Course.query.filter(and_(Course.coursename == coursename,Course.status==1)).all()
+        my_student = Course.query.filter(and_(Course.coursename == coursename,Course.status==0)).all()
         student = []
         for i in range(len(my_student)):
             item = my_student[i]
@@ -127,20 +134,35 @@ def course_mystudent():
 @bluecourse.route('/course/addhomework', methods=['POST'])
 @login_required
 def homework_add():
-    data_input = request.get_json()
-    courseid = int(data_input['courseid'])
-    starttime = data_input['starttime']
-    endtime = data_input['endtime']
-    homework = data_input['homework']
-    count = data_input['count']
-    course = Course(
-        courseid == courseid,
-        homework == homework,
-        starttime == starttime,
-        endtime == endtime,
-        count == count,
+    data_input = request.get_json(silent=True) or {}
+    try:
+        courseid = int(data_input['courseid'])
+        starttime = int(data_input['starttime'])
+        endtime = int(data_input['endtime'])
+        homework = int(data_input['homework'])
+        count = int(data_input['count'])
+    except (KeyError, TypeError, ValueError):
+        return jsonify({'status': False, 'error': '作业参数无效'}), 400
+
+    if starttime > endtime or count < 1:
+        return jsonify({'status': False, 'error': '时间范围或完成次数无效'}), 400
+
+    course = Course.query.filter(and_(
+        Course.id == courseid,
+        Course.username == current_user.id,
+        Course.status == 1,
+    )).first()
+    if course is None:
+        return jsonify({'status': False, 'error': '没有课程管理权限'}), 403
+
+    course_homework = CourseHomework(
+        courseid=courseid,
+        homework=homework,
+        starttime=starttime,
+        endtime=endtime,
+        count=count,
     )
-    db.session.add(course)
+    db.session.add(course_homework)
     db.session.commit()
     data = {
         'status': True,
@@ -154,12 +176,19 @@ EMOJIS = ["✅","❌"]
 @bluecourse.route('/course/lookhomework', methods=['POST'])
 @login_required
 def homework_look():
-    data_input = request.get_json()
-    courseid = int(data_input['courseid'])
+    data_input = request.get_json(silent=True) or {}
+    try:
+        courseid = int(data_input['courseid'])
+    except (KeyError, TypeError, ValueError):
+        return jsonify({'status': False, 'error': '课程参数无效'}), 400
     # 根据课程id查找作业
     course = Course.query.get(courseid)
     if not course is None:
-        if course.username == current_user.id:
+        membership = Course.query.filter(and_(
+            Course.coursename == course.coursename,
+            Course.username == current_user.id,
+        )).first()
+        if membership is not None:
             coursehw = CourseHomework.query.filter(
                 CourseHomework.courseid == courseid
             ).all()

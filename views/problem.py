@@ -30,19 +30,23 @@ def recommend():
     print("username",username)
     prblm = query_problems_of(username)
     print("做题记录")
-    type_counter = [[0,0]] * ALGORITHM_NUMBER
+    type_counter = [[0, 0] for _ in range(ALGORITHM_NUMBER)]
     cnt_all = len(prblm)
     for item in prblm:
-        if item.status ==False:
-            type_counter[item.problem_type][0] += 1
-        else:
+        if item.status == 1:
             type_counter[item.problem_type][1] += 1
+        else:
+            type_counter[item.problem_type][0] += 1
 
     recommend_problems = []
-    for i in range(type_counter):
-        if type_counter[i][0]+type_counter[i][1]<(int)(cnt_all/ALGORITHM_NUMBER):
+    target_count = cnt_all // ALGORITHM_NUMBER if ALGORITHM_NUMBER else 0
+    for i in range(ALGORITHM_NUMBER):
+        if type_counter[i][0] + type_counter[i][1] < target_count:
             recommend_problems.append(i)
-        if type_counter[i][0]*2>type_counter[i][1]:
+        if (
+            type_counter[i][0] * 2 > type_counter[i][1]
+            and i not in recommend_problems
+        ):
             recommend_problems.append(i)
     
     return jsonify({'recommend': recommend_problems})
@@ -74,9 +78,19 @@ def get_cirten_record():
     username = current_user.id
     my_problem_id = request.args.get('problem_id')
 
-    filepath_problem = ' ./data/problem/' + str(my_problem_id) + '.problem'
+    problem = Problem.query.filter_by(
+        problem_id=my_problem_id,
+        username=username,
+    ).first()
+    if problem is None:
+        return jsonify({'status': False, 'error': '题目记录不存在'}), 404
+
+    filepath_problem = './data/problem/' + str(my_problem_id) + '.md'
     # filepath_ans = './data/answer/' + str(my_problem_id) + '.ans'
-    filepath_image = './data/image/' + str(my_problem_id) + '.ans'
+    filepath_image = './images/' + str(my_problem_id) + '.png'
+
+    if not os.path.isfile(filepath_problem) or not os.path.isfile(filepath_image):
+        return jsonify({'status': False, 'error': '题目文件不存在'}), 404
 
     file_problem = open(filepath_problem,"r")
     data_problem = file_problem.read()
@@ -126,4 +140,3 @@ def genenrate_files():
         os.system('cp '+filepath_in + ' ./data/'+filepath_in_this)
         filepath_ans_this = codes[i].strip()+'.ans'
         os.system('cp '+filepath_ans + ' ./data/'+filepath_ans_this)
-

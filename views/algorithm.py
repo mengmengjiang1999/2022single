@@ -1,4 +1,4 @@
-from flask import Blueprint
+from flask import Blueprint, send_file
 
 from views.problem import ALGORITHM_TYPE
 bluealgorithm=Blueprint('algorithm',__name__)   #蓝图的对象的名称=Blueprint('自定义蓝图名称',__name__) 
@@ -8,17 +8,22 @@ from flask import request, jsonify
 from flask_login import current_user, login_required
 from sqlalchemy import and_, false, null, or_, true
 
-from app import db
+from models import db
 
-import random
 from datetime import datetime
 import hashlib
-import base64
-
 import os
 import random
+import re
 
 from models import Problem, Userinfo
+
+
+PROBLEM_ID_PATTERN = re.compile(r'^[0-9a-f]{64}$')
+
+
+def is_valid_problem_id(problem_id):
+    return isinstance(problem_id, str) and PROBLEM_ID_PATTERN.fullmatch(problem_id)
 
 def get_data_sha():
     time = datetime.timestamp(datetime.now())
@@ -89,14 +94,16 @@ def algorithm_fig():
     if request.method == 'GET':
         data_input = request.args
         problem_id = data_input.get('problem_id')
-        if problem_id:
+        problem = Problem.query.filter_by(
+            problem_id=problem_id,
+            username=current_user.id,
+        ).first()
+        if problem is not None and is_valid_problem_id(problem_id):
             from views.run import get_filepath_image
             fname = get_filepath_image(problem_id)
             if os.path.exists(fname):
-                with open(fname, "rb") as f:
-                    data_image = f.read()
-                    return data_image
-    return ""
+                return send_file(fname, mimetype='image/png')
+    return jsonify({'status': False, 'error': '图片不存在'}), 404
 
 @bluealgorithm.route('/algorithm', methods = ['GET', 'POST'])
 @login_required
@@ -165,31 +172,49 @@ def algorithm():
                 return jsonify(data)
         else:
             data_sha = problem_id
+            if not is_valid_problem_id(data_sha):
+                return jsonify({'status': False, 'error': '题目编号无效'}), 400
             # 那么这就是取读取数据了
             prblm = Problem.query.filter(
                 and_(Problem.problem_id==data_sha,
                     Problem.username==current_user.id
                 )).first()
-            data = run_algorithm_get(curr_problem_type,data_sha,prblm.status,False)
+            if prblm is None:
+                return jsonify({'status': False, 'error': '题目不存在'}), 404
+            data = run_algorithm_get(
+                prblm.problem_type, data_sha, prblm.status, False
+            )
             return jsonify(data)
         
     elif request.method == 'POST':
-        data_input = request.get_json()
+        data_input = request.get_json(silent=True) or {}
         print("algrithm_POST",request.get_json())
-        data = run_algorithm_post(data_input)
-        curr_problem_id = data_input['problem_id']
+        curr_problem_id = data_input.get('problem_id')
+        if not is_valid_problem_id(curr_problem_id) or 'answer' not in data_input:
+            return jsonify({'status': False, 'error': '提交参数无效'}), 400
 
         print("curr_problem_id",curr_problem_id)
 
-        prblm = Problem.query.filter(
-            Problem.problem_id==curr_problem_id).first()
+        prblm = Problem.query.filter(and_(
+            Problem.problem_id==curr_problem_id,
+            Problem.username==current_user.id,
+        )).first()
+        if prblm is None:
+            return jsonify({'status': False, 'error': '题目不存在'}), 404
+
+        try:
+            data = run_algorithm_post(data_input)
+        except FileNotFoundError:
+            return jsonify({'status': False, 'error': '题目答案文件不存在'}), 404
 
         user = Userinfo.query.filter(Userinfo.username==current_user.id).first()
-        user.submitted += 1
+        if user is None:
+            return jsonify({'status': False, 'error': '用户不存在'}), 404
+        user.submitted = (user.submitted or 0) + 1
 
         if data['answer']==True:
             prblm.status = 1
-            user.correct += 1
+            user.correct = (user.correct or 0) + 1
         else:
             prblm.status = 2
             prblm.problem_time = datetime.timestamp(datetime.now())

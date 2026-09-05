@@ -1,68 +1,70 @@
-from flask import Flask
-
-from flask_sqlalchemy import SQLAlchemy
-
-from tools import stringToBase64,base64ToString
-
-# from flask_sqlalchemy import SQLAlchemy  # 导入扩展类
-
-app = Flask(__name__)
-
-# adding configuration for using a sqlite database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
- 
-
-from models import db
-# Creating an SQLAlchemy instance
-# db = SQLAlchemy(app)
-db.init_app(app)
-
-# Import for Migrations
-from flask_migrate import Migrate, migrate
- 
-# Settings for migrations
-migrate = Migrate(app, db)
-
-# login
-
-app.secret_key= '23232333'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
-
-
-from views.user import blueuser
-from views.algorithm import bluealgorithm
-from views.tool import bluetool
-from views.test import bluetest
-from views.problem import blueproblem
-from views.course import bluecourse
-
-app.register_blueprint(blueuser)
-app.register_blueprint(bluealgorithm)
-app.register_blueprint(bluetool)
-app.register_blueprint(bluetest)
-app.register_blueprint(blueproblem)
-app.register_blueprint(bluecourse)
-
-from werkzeug.security import generate_password_hash
+import os
 
 import click
+from flask import Flask
+from flask_migrate import Migrate
 
-@app.cli.command('init-db')  # 注册为命令
-@click.option('--drop', is_flag=True, help='Create after drop.')  # 设置选项
-def initdb(drop):
-    """Initialize the database."""
-    if drop:  # 判断是否输入了选项
-        db.drop_all()
-    db.create_all()
-    click.echo('Initialized database.')  # 输出提示信息
+from models import db
 
-if __name__ == '__main__':
+
+migrate = Migrate()
+
+
+def create_app(test_config=None):
+    """Create and configure the Flask application."""
+    flask_app = Flask(__name__)
+    flask_app.config.from_mapping(
+        SECRET_KEY=os.environ.get("SECRET_KEY", "dev-only-change-me"),
+        SQLALCHEMY_DATABASE_URI=os.environ.get(
+            "DATABASE_URL", "sqlite:///site.db"
+        ),
+        SQLALCHEMY_TRACK_MODIFICATIONS=False,
+    )
+
+    if test_config:
+        flask_app.config.update(test_config)
+
+    db.init_app(flask_app)
+    migrate.init_app(flask_app, db)
+
+    from views.algorithm import bluealgorithm
+    from views.course import bluecourse
+    from views.problem import blueproblem
+    from views.test import bluetest
+    from views.tool import bluetool
+    from views.user import blueuser, login_manager
+
+    login_manager.init_app(flask_app)
+    for blueprint in (
+        blueuser,
+        bluealgorithm,
+        bluetool,
+        bluetest,
+        blueproblem,
+        bluecourse,
+    ):
+        flask_app.register_blueprint(blueprint)
+
+    @flask_app.cli.command("init-db")
+    @click.option("--drop", is_flag=True, help="Drop tables before creating them.")
+    def init_db(drop):
+        """Initialize the application database."""
+        if drop:
+            db.drop_all()
+        db.create_all()
+        click.echo("Initialized database.")
+
+    return flask_app
+
+
+app = create_app()
+
+
+if __name__ == "__main__":
     from werkzeug.middleware.proxy_fix import ProxyFix
-    app.wsgi_app = ProxyFix(app.wsgi_app)
 
     from views.run import pre_compile
 
+    app.wsgi_app = ProxyFix(app.wsgi_app)
     pre_compile()
-    app.run(debug=True)
-
-    # app.run()
+    app.run()

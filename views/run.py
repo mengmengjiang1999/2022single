@@ -1,5 +1,6 @@
 import random
-import os
+import subprocess
+from pathlib import Path
 
 filepath_pre_data = './../data/'
 filepath_pre_in = './data/input/'
@@ -27,18 +28,12 @@ FILEPATH_CODE = [FILEPATH_CODE_SHORTESTPATH,FILEPATH_CODE_TSP,FILEPATH_CODE_SPAN
 
 def pre_compile():
     # 对程序进行预编译
-    os.system('g++ -o '+FILEPATH_EXE_SHORTESTPATH+' '+FILEPATH_CODE_SHORTESTPATH)
-    os.system('g++ -o '+FILEPATH_EXE_ROOTCOUNT+' '+FILEPATH_CODE_ROOTCOUNT)
-    os.system('g++ -o '+FILEPATH_EXE_SPANCOUNT+' '+FILEPATH_CODE_SPANCOUNT)
-    os.system('g++ -o '+FILEPATH_EXE_TSP+' '+FILEPATH_CODE_TSP)
-    pass
+    for executable, source in zip(FILEPATH_EXE, FILEPATH_CODE):
+        subprocess.run(['g++', '-o', executable, source], check=True)
 
 def del_files():
-    os.system('rm '+FILEPATH_EXE_SHORTESTPATH)
-    os.system('rm '+FILEPATH_EXE_ROOTCOUNT)
-    os.system('rm '+FILEPATH_EXE_SPANCOUNT)
-    os.system('rm '+FILEPATH_EXE_TSP)
-    pass
+    for executable in FILEPATH_EXE:
+        Path(executable).unlink(missing_ok=True)
 
 # 无论数据类型是什么，都要返回边列表的形式
 # 接口约定
@@ -111,6 +106,16 @@ def run(problem_type:int,problem_sha:str,need_run:bool=False):
 
     print("生成新题目")
     print("题目类型",problem_type)
+
+    for directory in (
+        filepath_pre_in,
+        filepath_pre_answer,
+        filepath_pre_problem,
+        filepath_pre_html,
+        filepath_pre_dot,
+        filepath_pre_image,
+    ):
+        Path(directory).mkdir(parents=True, exist_ok=True)
     
     # 如果需要真的生成新的题目，再生成
     # 这里是生成新数据的地方
@@ -119,7 +124,13 @@ def run(problem_type:int,problem_sha:str,need_run:bool=False):
     with open(filepath_in,"w") as file_in:
         file_in.write(data)
     # 执行
-    os.system(FILEPATH_EXE[problem_type] +' < '+filepath_in+' > '+filepath_ans)
+    with open(filepath_in, 'r') as file_in, open(filepath_ans, 'w') as file_ans:
+        subprocess.run(
+            [FILEPATH_EXE[problem_type]],
+            stdin=file_in,
+            stdout=file_ans,
+            check=True,
+        )
 
     with open(filepath_ans,"r") as file_ans:
         ans = file_ans.read().strip()
@@ -141,7 +152,18 @@ def run(problem_type:int,problem_sha:str,need_run:bool=False):
         file_problem.write(problem)
 
     # 转换成html
-    os.system('pandoc --standalone --template  ./data/template.html '+ filepath_problem + ' -o ' + filepath_problem_html)
+    subprocess.run(
+        [
+            'pandoc',
+            '--standalone',
+            '--template',
+            './data/template.html',
+            filepath_problem,
+            '-o',
+            filepath_problem_html,
+        ],
+        check=True,
+    )
 
     return filepath_in, filepath_ans, filepath_problem_html, filepath_image
 

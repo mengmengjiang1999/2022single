@@ -1,4 +1,3 @@
-import email
 from flask import Blueprint
 blueuser=Blueprint('user',__name__)   #蓝图的对象的名称=Blueprint('自定义蓝图名称',__name__) 
 
@@ -8,31 +7,29 @@ from flask_login import LoginManager
 from flask_login import UserMixin, login_user, logout_user, login_required, current_user
 
 from sqlalchemy import and_, false, or_, true
-from app import db,app
-
-from models import Userinfo
+from models import Userinfo, db
+from werkzeug.security import check_password_hash, generate_password_hash
 
 
 login_manager = LoginManager()
-login_manager.login_view = 'login'
+login_manager.login_view = 'user.login'
 login_manager.login_message_category = 'info'
 login_manager.login_message = 'Access denied.'
-login_manager.init_app(app)
-
 class User(UserMixin):
     pass
 
 @login_manager.unauthorized_handler
 def unauth_handler():
-    return "Access denied.", 401
+    return jsonify({'status': False, 'error': 'Access denied.'}), 401
 
 @login_manager.user_loader
 def load_user(username):
-    if query_user(username) is not None:
+    if query_user(username):
         curr_user = User()
         curr_user.id = username
 
         return curr_user
+    return None
 
 def query_user(username):
     user = Userinfo.query.filter(Userinfo.username == username).first()
@@ -42,11 +39,21 @@ def query_user(username):
         return True
 
 def valid_login(username, password):
-    user = Userinfo.query.filter(and_(Userinfo.username == username, Userinfo.password == password)).first()
-    if user:
-        return True
-    else:
+    user = Userinfo.query.filter(Userinfo.username == username).first()
+    if user is None:
         return False
+
+    password_is_hashed = user.password.startswith(('pbkdf2:', 'scrypt:'))
+    if password_is_hashed:
+        return check_password_hash(user.password, password)
+
+    # Keep old databases usable and upgrade a legacy plaintext password after
+    # the first successful login.
+    if user.password == password:
+        user.password = generate_password_hash(password)
+        db.session.commit()
+        return True
+    return False
 
 def valid_input_regist(username,password1,password2,email):
     data = {
@@ -119,15 +126,21 @@ def regist():
         'error': None,
     }
     if request.method == 'POST':
-        data_input = request.get_json()
-        username = data_input['username']
-        password1=data_input['password1']
-        password2=data_input['password2']
-        email=data_input['email']
+        data_input = request.get_json(silent=True) or {}
+        username = data_input.get('username')
+        password1=data_input.get('password1')
+        password2=data_input.get('password2')
+        email=data_input.get('email')
         data = valid_input_regist(username,password1,password2,email)
         if data['status']:
             if valid_regist(data_input['username'], data_input['email']):
-                user = Userinfo(username=data_input['username'], password=data_input['password1'], email=data_input['email'])
+                user = Userinfo(
+                    username=data_input['username'],
+                    password=generate_password_hash(data_input['password1']),
+                    email=data_input['email'],
+                    submitted=0,
+                    correct=0,
+                )
                 db.session.add(user)
                 db.session.commit()
                 data['status']=True
@@ -146,9 +159,9 @@ def login():
         'error': None
     }
     if request.method == 'POST':
-        data_input = request.get_json()
-        username = data_input['username']
-        password = data_input['password']
+        data_input = request.get_json(silent=True) or {}
+        username = data_input.get('username')
+        password = data_input.get('password')
 
         data = valid_input_login(username,password)
 
